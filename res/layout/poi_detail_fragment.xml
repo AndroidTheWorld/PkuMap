@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <ImageView 
+        		android:id="@+id/pic_detail_pic"
+        		android:layout_alignParentLeft="true"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:src="@drawable/ic_launcher"/>
+    		<LinearLayout
+        		android:layout_width="fill_parent"
+        		android:layout_height="wrap_content"
+        		android:orientation="vertical"
+       			android:layout_toRightOf="@id/pic_detail_pic">
+			    	<TextView 
+			        	android:id="@+id/poi_detail_name"
+			        	android:layout_width="fill_parent"
+			        	android:layout_height="wrap_content"
+			        	android:text="POI名字"/>
+			    	<View  
+		   				android:layout_width="fill_parent"  
+		    			android:layout_height="1px" 
+		   				android:background="?android:attr/listDivider"  
+					/>
+			    	<TextView 
+			        	android:id="@+id/poi_detail_addr"
+			        	android:layout_width="fill_parent"
+			        	android:layout_height="wrap_content"
+			        	android:text="POI地址"/>
+			     	<View  
+		   				android:layout_width="fill_parent"  
+		    			android:layout_height="1px" 
+		   				android:background="?android:attr/listDivider"  
+					/>
+			    	<TextView 
+			        	android:id="@+id/poi_detail_desc"
+			        	android:layout_width="fill_parent"
+			        	android:layout_height="wrap_content"
+			        	android:text="POI描述"/>
+			    	<View  
+		   				android:layout_width="fill_parent"  
+		    			android:layout_height="1px" 
+		   				android:background="?android:attr/listDivider"  
+					/>
+			</LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+    
+	<LinearLayout 
+	    android:id="@+id/poi_option"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+        <LinearLayout
+              android:id="@+id/poi_naviItem1"
+              style="@style/main_bottom_item" >
+			<RadioButton
+              android:id="@+id/poi_go"
+              style="@style/poi_potion"      
+              android:drawableLeft="@drawable/ic_launcher"
+              android:paddingTop="8dp"
+              android:text="到这去" /> 
+        </LinearLayout>
+	    
+	    <View  
+   			android:layout_width="1px"  
+    		android:layout_height="fill_parent" 
+   			android:background="?android:attr/listDivider"  
+		/>
+	     <LinearLayout
+              android:id="@+id/poi_naviItem2"
+              style="@style/main_bottom_item" >
+			<RadioButton
+              android:id="@+id/poi_near"
+              style="@style/poi_potion"       
+              android:drawableLeft="@drawable/ic_launcher"
+              android:paddingTop="8dp"
+              android:text="附近" />       
+        </LinearLayout>
+	    
+	    <View  
+   			android:layout_width="1px"  
+    		android:layout_height="fill_parent" 
+   			android:background="?android:attr/listDivider"  
+		/>
+	     <LinearLayout
+              android:id="@+id/poi_naviItem3"
+              style="@style/main_bottom_item" >
+			 <RadioButton
+              android:id="@+id/poi_collect"
+              style="@style/poi_potion" 
+              android:drawableLeft="@drawable/ic_launcher"
+              android:paddingTop="8dp"
+              android:text="收藏" />     
+        </LinearLayout>
+	   
+	</LinearLayout>
+</LinearLayout>

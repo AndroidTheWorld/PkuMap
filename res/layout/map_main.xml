@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/map_full_relative"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+  	<com.pkumap.activity.MapView
+        android:id="@+id/mapView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"/>
+   <LinearLayout 
+       android:id="@+id/search_layout"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:layout_alignTop="@id/mapView"
+       android:layout_marginTop="15dp"
+       android:layout_marginLeft="20dp"
+       android:layout_marginRight="20dp">
+       <EditText 
+	      android:id="@+id/poi_edit_search"
+	      android:layout_width="fill_parent"
+	      android:layout_height="wrap_content"
+	      android:background="@android:drawable/edit_text"
+	      android:padding="5dp"
+	      android:singleLine="true" 
+	      android:focusable="false"
+	      android:hint="搜索" />
+   </LinearLayout>
+    <LinearLayout
+                android:id="@+id/bottomList"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/mapView"
+                android:background="@android:color/white"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="20dp"
+       			android:layout_marginRight="20dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:id="@+id/naviItem1"
+                    style="@style/main_bottom_item" >
+
+                    <RadioButton
+                        android:id="@+id/nearby"
+                        style="@style/footbar"
+                        android:drawableLeft="@drawable/ic_launcher"
+                        android:paddingTop="8dp"
+                        android:text="附近" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/naviItem2"
+                    style="@style/main_bottom_item" >
+
+                    <RadioButton
+                        android:id="@+id/pathplan"
+                        style="@style/footbar"
+                        android:drawableLeft="@drawable/ic_launcher"
+                        android:paddingTop="8dp"
+                        android:text="路线" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/naviItem3"
+                    style="@style/main_bottom_item" >
+
+                    <RadioButton
+                        android:id="@+id/navigation"
+                        style="@style/footbar"
+                        android:drawableLeft="@drawable/ic_launcher"
+                        android:paddingTop="8dp"
+                        android:text="导航" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/naviItem4"
+                    style="@style/main_bottom_item" >
+
+                    <RadioButton
+                        android:id="@+id/tool"
+                        style="@style/footbar"
+                        android:drawableLeft="@drawable/ic_launcher"
+                        android:paddingTop="8dp"
+                        android:text="工具" />
+                </LinearLayout>
+   </LinearLayout>
+   <LinearLayout 
+       android:id="@+id/poi_detail_layout"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       android:background="@android:color/white"
+       android:layout_alignBottom="@id/mapView"
+       android:layout_marginBottom="10dp"
+       android:layout_marginLeft="0dp"
+       android:layout_marginRight="0dp"></LinearLayout>
+</RelativeLayout>
