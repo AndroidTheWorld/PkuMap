@@ -53,6 +53,22 @@ public class PoiService {
 		return poi;
 	}
 	/**
+	 * 根据名称获取PointId
+	 * @param name
+	 * @return
+	 */
+	public int getPointIdByName(String name){
+		int pointid=-1;
+		String select_sql="select pointid from poi where name=? limit 0,1";
+		String[] args=new String[]{name};
+		Cursor cursor=db.rawQuery(select_sql, args);
+		if(cursor.moveToNext()){
+			pointid=cursor.getInt(cursor.getColumnIndex("pointid"));
+		}
+		cursor.close();
+		return pointid;
+	}
+	/**
 	 * 获取全部POI的名称
 	 * @return
 	 */
