@@ -1,6 +1,10 @@
 package com.pkumap.bean;
 
-public class RoadNode {
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
+
+public class RoadNode implements Parcelable{
 	private int id;
 	private float x;
 	private float y;
@@ -37,6 +41,36 @@ public class RoadNode {
 	}
 	public void setType(String type) {
 		this.type = type;
+	}
+	/** 
+     * 序列化实体类 
+     */  
+    public static final Parcelable.Creator<RoadNode> CREATOR = new Creator<RoadNode>() {  
+        public RoadNode createFromParcel(Parcel source) {  
+        	RoadNode roadNode= new RoadNode();
+        	roadNode.id=source.readInt();
+        	roadNode.x=source.readFloat();
+        	roadNode.y=source.readFloat();
+        	roadNode.type=source.readString();
+            return roadNode;  
+        }  
+  
+        public RoadNode[] newArray(int size) {  
+            return new RoadNode[size];  
+        }  
+    };  
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		// TODO Auto-generated method stub
+		dest.writeInt(id);
+		dest.writeFloat(x);
+		dest.writeFloat(y);
+		dest.writeString(type);
 	}
 	
 	
