@@ -21,17 +21,12 @@ import android.content.Context;
 
 public class PoiManager {
 	private PoiService poiService;
-	private PathPlanService pathPlanService;
 	private Context context;
 	public PoiManager(Context context) {
 		this.context=context;
 		if(poiService==null){
 			poiService=new PoiService(context);
 		}
-		if(pathPlanService==null){
-			pathPlanService=new PathPlanService(context);
-		}
-		
 	}
 	/**
 	 * 根据名称返回POI
@@ -41,6 +36,14 @@ public class PoiManager {
 	public Poi getPoiByName(String name){
 		return poiService.getPoiByName(name);
 	}
+	/**
+	 * 根据名称获取PointId
+	 * @param name
+	 * @return
+	 */
+	public int getPointIdByName(String name){
+		return poiService.getPointIdByName(name);
+	} 
 	/**
 	 * 获取POI的名称
 	 * @return
@@ -191,64 +194,7 @@ public class PoiManager {
 		}
 		
 	}
-	/**
-	 * 导入路径规划的路的信息
-	 */
-	public void importRoadInfo(){
-			try{
-				
-				InputStream input=context.getResources().getAssets().open("3dpath.txt");
-				
-				byte[] data=readInputStream(input);
-				String dataStr=new String(data,"UTF-8");
-				JSONObject jsonPOI=new JSONObject(dataStr);
-				JSONArray arrayPOI=jsonPOI.getJSONArray("road");
-				
-				for(int i=0;i<arrayPOI.length();i++){
-					JSONObject roadObj=arrayPOI.getJSONObject(i);
-					
-					Road road=new Road();
-					road.setBegin(roadObj.getInt("begin"));
-					road.setEnd(roadObj.getInt("end"));
-					road.setDistance((float)roadObj.getDouble("distance"));
-					road.setType(roadObj.getString("type"));
-					
-					pathPlanService.insertRoadInfo(road);
-				}
-				
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-	}
-	/**
-	 * 导入路径规划的点的信息
-	 */
-	public void importRoadNodeInfo(){
-			try{
-			
-			InputStream input=context.getResources().getAssets().open("3dpoint.txt");
-			
-			byte[] data=readInputStream(input);
-			String dataStr=new String(data,"UTF-8");
-			JSONObject jsonPOI=new JSONObject(dataStr);
-			JSONArray arrayPOI=jsonPOI.getJSONArray("point");
-			
-			for(int i=0;i<arrayPOI.length();i++){
-				JSONObject roadNodeObj=arrayPOI.getJSONObject(i);
-				
-				RoadNode roadNode=new RoadNode();
-				roadNode.setId(roadNodeObj.getInt("id"));
-				roadNode.setX((float)roadNodeObj.getDouble("x"));
-				roadNode.setY((float)roadNodeObj.getDouble("y"));
-				roadNode.setType(roadNodeObj.getString("type"));
-				
-				pathPlanService.insertRoadNodeInfo(roadNode);
-			}
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+	
 	/**
 	 * 关闭数据库
 	 */
