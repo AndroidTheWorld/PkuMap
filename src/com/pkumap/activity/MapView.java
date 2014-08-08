@@ -1,9 +1,11 @@
 package com.pkumap.activity;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
+import com.pkumap.bean.RoadNode;
 import com.pkumap.util.ConvertCoordinate;
 import com.pkumap.util.ImageLoader;
 import com.pkumap.util.PoiManager;
@@ -19,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
@@ -182,6 +185,10 @@ public class MapView extends View {
 	 */
 	public Poi poi;
 	/**
+	 * 当前地图上有路径
+	 */
+	public ArrayList<RoadNode> roadPoints;
+	/**
 	 * 获取传入的Activity实例
 	 */
 	public Context context;
@@ -214,6 +221,7 @@ public class MapView extends View {
 	    	fmView=mapActivity.getFragmentManager();
 	    }
 	    convertCoordinate=new ConvertCoordinate();
+	    roadPoints=new ArrayList<RoadNode>();
 	    Log.i("ScreenWH", "width:"+ScreenWidth+",height:"+ScreenHeight);
 	}
 	/**
@@ -296,6 +304,9 @@ public class MapView extends View {
 		DrawVisibleMap();
 		if(poi!=null)
 		DrawPoiMarker(poi);
+		if(roadPoints.size()>0){
+			DrawPathInMap(roadPoints);
+		}
 	}
 	/**
 	 * 地图缩放bySummer
@@ -628,6 +639,40 @@ public class MapView extends View {
    		ft.commit();
 	}
 	/**
+	 * 在地图上画出相应的路径
+	 * @param pathPoints
+	 */
+	public void DrawPathInMap(ArrayList<RoadNode> roadNodes){
+		
+		ArrayList<Point> pathPoints=new ArrayList<Point>();
+		for(int i=0;i<roadNodes.size();i++){
+			Point point=new Point();
+			float x=roadNodes.get(i).getX();
+			float y=roadNodes.get(i).getY();
+			
+			point.setX(x);
+			point.setY(y);
+			Point newPoint=new Point();
+			newPoint=convertCoordinate.getScreenPointFromLonLat(point, this);
+			pathPoints.add(newPoint);
+		}
+		
+		Paint paint=new Paint();
+		paint.setAntiAlias(true);   
+		paint.setColor(Color.BLUE);
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(3);
+		
+		Path path=new Path();
+		Point start=pathPoints.get(0);
+		path.moveTo(start.getX(), start.getY());
+		for(int i=1;i<pathPoints.size();i++){
+			Point midPoint=pathPoints.get(i);
+			path.lineTo(midPoint.getX(), midPoint.getY());
+		}
+		canvas.drawPath(path, paint);
+	}
+	/**
 	 * 当前手点下的位置是否在poi的显示范围
 	 * @param x 手机屏幕上当前点的X坐标
 	 * @param y 手机屏幕上当前点的y坐标
@@ -789,7 +834,8 @@ public class MapView extends View {
 	 */
 	public Bitmap readBitmapFromAsset(int level,int x,int y){
 		Bitmap bitmap=null;
-		String bitmapUrl="map2d/"+level+"/"+y+"_"+x+".png";
+		String bitmapUrl="map3d/"+level+"/"+x+","+y+".jpg";
+//		String bitmapUrl="map2d/"+level+"/"+y+"_"+x+".png";
 		bitmap=imageLoader.getBitmapFromMemoryCache(bitmapUrl);
 		try{	
 			if(bitmap!=null){
