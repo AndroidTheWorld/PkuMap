@@ -17,7 +17,7 @@ public class PathPlanActivity extends Activity {
 	private AutoCompleteTextView path_start_txt=null;
 	private AutoCompleteTextView path_end_txt=null;
 	public final static int RESULT_PATHPLAN=3;
-	private PoiManager poiManager;
+	public PoiManager poiManager;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
