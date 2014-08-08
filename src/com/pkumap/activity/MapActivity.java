@@ -1,8 +1,11 @@
 package com.pkumap.activity;
 
 
+import java.util.ArrayList;
+
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
+import com.pkumap.bean.RoadNode;
 import com.pkumap.eventlistener.MapOnClickListener;
 import com.pkumap.eventlistener.SearchPoiOnClickListener;
 import com.pkumap.util.ConvertCoordinate;
@@ -83,11 +86,15 @@ public class MapActivity extends Activity {
 		
 		switch (resultCode) {
 		case RESULT_OK:
-			showPoiInMap(data);
+			Poi poi=data.getParcelableExtra("poi");
+			edit_search.setText(data.getExtras().getString("poi_name"));
+			showPoiInMap(poi);
 			break;
 		case PathPlanActivity.RESULT_PATHPLAN:
-			showPathInMap(data);
-			
+			Log.i("ZZZ", "accccc");
+			Bundle pathBundle=data.getExtras();
+			ArrayList<RoadNode> roadNodes=pathBundle.getParcelableArrayList("path");
+			showPathInMap(roadNodes);
 			break;
 		default:
 			break;
@@ -107,17 +114,23 @@ public class MapActivity extends Activity {
 	/**
 	 * 在地图上展示规划的路径
 	 */
-	private void showPathInMap(Intent data){
-		Bundle pathBundle=data.getExtras();
-		edit_search.setText(pathBundle.getString("start"));
+	private void showPathInMap(ArrayList<RoadNode> roadNodes){
+		Log.i("ZZZ", "aaabbb");
+		//将起点移动到屏幕的中心
+		RoadNode startNode=roadNodes.get(0);
+		Point startPoint=new Point(startNode.getX(),startNode.getY());
+		startPoint=convertCoordinate.getScreenPointFromLonLat(startPoint, mapView);
+		mapView.moveDX=(mapView.ScreenWidth/2-startPoint.getX());
+		mapView.moveDY=(mapView.ScreenHeight/2-startPoint.getY());
+		
+		mapView.currentStatus=mapView.STATUS_MOVE;
+		mapView.roadPoints=roadNodes;
+		mapView.invalidate();
 	}
 	/**
 	 * 在地图上展示相应的POI
 	 */
-	private void showPoiInMap(Intent data){
-		
-		Poi poi=data.getParcelableExtra("poi");
-		edit_search.setText(data.getExtras().getString("poi_name"));
+	private void showPoiInMap(Poi poi){
 		
 		Point curLonLat=poi.getCenter();
 		Point screenPoint=convertCoordinate.getScreenPointFromLonLat(curLonLat, mapView);
