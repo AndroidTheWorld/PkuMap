@@ -1,5 +1,4 @@
-package com.pku.path;
-
+package com.pkumap.util;
 import java.util.ArrayList;
 
 
@@ -12,19 +11,19 @@ public class Dijkstra {
 	 * 无穷大，建立地图时，用来表示不可达
 	 */
 	static final int INF = 999999;
-	boolean visit[] = new boolean[pCount];
+	boolean[] visit = new boolean[pCount];
 	/**
 	 * 数组prev[i]记录的是从源到顶点i最短路径上i的前一个顶点
 	 */
-	int prev[] = new int[pCount];
-	double dis[] = new double[pCount];
-	double [][]map = new double[pCount][pCount];
+	int[] prev = new int[pCount];
+	float[] dis= new float[pCount];
+	float[][] map = new float[pCount][pCount];
 
 	/**
 	 * 构造函数，注意点的ID是从0还是1开始
 	 * @param t 地图信息，即邻接矩阵
 	 */
-	public Dijkstra(double [][]t){
+	public Dijkstra(float[][] t){
 		for(int i=0;i<pCount;i++)
 			for(int j=0;j<pCount;j++)
 				map[i][j] = t[i][j];
