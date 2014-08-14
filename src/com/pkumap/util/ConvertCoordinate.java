@@ -33,10 +33,15 @@ public class ConvertCoordinate {
 		float ScreenHeight=mapView.ScreenHeight;
 		float flagScale=mapView.getScaleFlag(mapView.level);
 		float scaleLevel=mapView.scaleLevel;
+		if("3dmap".equals(mapView.map_type)){
+			x=((x+(mapDX-ScreenWidth/2))/(flagScale*scaleLevel))*1.95f-2000;     //在3D上有点区别，需要注意
+			y=2000-((y+(mapDY-ScreenHeight/2))/(flagScale*scaleLevel))*1.95f;
+		}else{
+			x=(x+(mapDX-ScreenWidth/2))/(flagScale*scaleLevel)-1024;
+			y=1024-(y+(mapDY-ScreenHeight/2))/(flagScale*scaleLevel);
+		}
 		
-		x=(x+(mapDX-ScreenWidth/2))/(flagScale*scaleLevel)-1024;
-		y=1024-(y+(mapDY-ScreenHeight/2))/(flagScale*scaleLevel);
-		Log.i("ZDX", "x:"+screenPoint.getX()+",y:"+screenPoint.getY()+"lon:"+x+",lat:"+y);
+		Log.i("ZDX","mapDX:"+mapDX+ ",flagScale:"+flagScale+",scaleLevel:"+scaleLevel+",x:"+screenPoint.getX()+",y:"+screenPoint.getY()+"lon:"+x+",lat:"+y);
 		lonLatPoint=new Point(x,y);
 		return lonLatPoint;
 	}
@@ -66,9 +71,14 @@ public class ConvertCoordinate {
 		float ScreenHeight=mapView.ScreenHeight;
 		float flagScale=mapView.getScaleFlag(mapView.level);
 		float scaleLevel=mapView.scaleLevel;
+		if("3dmap".equals(mapView.map_type)){
+			x=((x+2000)/1.95f)*flagScale*scaleLevel-(mapDX-ScreenWidth/2);
+			y=(Math.abs(y-2000)/1.95f)*flagScale*scaleLevel-(mapDY-ScreenHeight/2);
+		}else{
+			x=(x+1024)*flagScale*scaleLevel-(mapDX-ScreenWidth/2);
+			y=Math.abs(y-1024)*flagScale*scaleLevel-(mapDY-ScreenHeight/2);
+		}
 		
-		x=(x+1024)*flagScale*scaleLevel-(mapDX-ScreenWidth/2);
-		y=Math.abs(y-1024)*flagScale*scaleLevel-(mapDY-ScreenHeight/2);
 		screenPoint=new Point(x,y);
 		return screenPoint;
 	}
