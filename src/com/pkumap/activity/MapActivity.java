@@ -3,35 +3,46 @@ package com.pkumap.activity;
 
 import java.util.ArrayList;
 
+import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.RoadNode;
 import com.pkumap.eventlistener.MapOnClickListener;
 import com.pkumap.eventlistener.SearchPoiOnClickListener;
+import com.pkumap.util.BuildingManager;
 import com.pkumap.util.ConvertCoordinate;
+import com.pkumap.util.PoiManager;
 import com.zdx.pkumap.R;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.TextureView;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
-import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class MapActivity extends Activity {
+public class MapActivity extends FragmentActivity {
 	private final static String TAG="MapActivity";
 	private MapView mapView=null;
 	private EditText edit_search=null;
 	private RadioButton radio_near=null;
 	private RadioButton radio_pathplan=null;
+	private ImageView zoom_in=null;
+	private ImageView zoom_out=null;
+	private ImageView layers=null;
+	
+	private MapOnClickListener mapOnClickListener;
 	private ConvertCoordinate convertCoordinate;
 	public FragmentManager fm;
 	private final static String picurl="http://162.105.30.246:8080/pkumap/map?level=1&x=7&y=7&type=2dmap";
@@ -59,39 +70,68 @@ public class MapActivity extends Activity {
 	/*	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 			WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
 		setContentView(R.layout.map_main);
-		
+		fm=getFragmentManager();
         mapView=(MapView) findViewById(R.id.mapView);
         edit_search=(EditText) findViewById(R.id.poi_edit_search);
         radio_near=(RadioButton) findViewById(R.id.nearby);
         radio_pathplan=(RadioButton) findViewById(R.id.pathplan);
+        zoom_in=(ImageView) findViewById(R.id.zoom_in);
+        zoom_out=(ImageView) findViewById(R.id.zoom_out);
+        layers=(ImageView) findViewById(R.id.layers);
+       
         
+        mapOnClickListener=new MapOnClickListener(this);
  //       mapView.setOnClickListener(new MapOnClickListener(MapActivity.this));
-        edit_search.setOnClickListener(new MapOnClickListener(MapActivity.this));
-        radio_near.setOnClickListener(new MapOnClickListener(MapActivity.this));
-        radio_pathplan.setOnClickListener(new MapOnClickListener(MapActivity.this));
+        edit_search.setOnClickListener(mapOnClickListener);
+        radio_near.setOnClickListener(mapOnClickListener);
+        radio_pathplan.setOnClickListener(mapOnClickListener);
+        zoom_in.setOnClickListener(mapOnClickListener);
+        zoom_out.setOnClickListener(mapOnClickListener);
+        layers.setOnClickListener(mapOnClickListener);
+        
         
         convertCoordinate=new ConvertCoordinate();
-        
-        fm=getFragmentManager();
-        
-        
+      
+       
 		// 显示自定义的地图View
 		//	mMapView.setFocusable(true);
 //		setContentView(mapView);
 		
 	}
+	
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		
+	}
+
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		openGPSSettings();
+	}
+
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
 		
 		switch (resultCode) {
 		case RESULT_OK:
-			Poi poi=data.getParcelableExtra("poi");
 			edit_search.setText(data.getExtras().getString("poi_name"));
-			showPoiInMap(poi);
+			if("3dmap".equals(mapView.map_type)){
+				Building building=data.getParcelableExtra("building");
+				showBuildingInMap(building);
+			}else{
+				Poi poi=data.getParcelableExtra("poi");
+				showPoiInMap(poi);
+			}
 			break;
 		case PathPlanActivity.RESULT_PATHPLAN:
-			Log.i("ZZZ", "accccc");
 			Bundle pathBundle=data.getExtras();
 			ArrayList<RoadNode> roadNodes=pathBundle.getParcelableArrayList("path");
 			showPathInMap(roadNodes);
@@ -112,10 +152,22 @@ public class MapActivity extends Activity {
 		
 	}
 	/**
+	 * 启动GPS
+	 */
+	private void openGPSSettings(){
+		LocationManager alm=(LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		if(alm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)){
+			Toast.makeText(this, "GPS已经开启", Toast.LENGTH_SHORT).show();
+		}else{
+			Toast.makeText(this, "请开启GPS", Toast.LENGTH_SHORT).show();
+			Intent myIntent=new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(myIntent);
+		}
+	}
+	/**
 	 * 在地图上展示规划的路径
 	 */
-	private void showPathInMap(ArrayList<RoadNode> roadNodes){
-		Log.i("ZZZ", "aaabbb");
+	public void showPathInMap(ArrayList<RoadNode> roadNodes){
 		//将起点移动到屏幕的中心
 		RoadNode startNode=roadNodes.get(0);
 		Point startPoint=new Point(startNode.getX(),startNode.getY());
@@ -126,6 +178,30 @@ public class MapActivity extends Activity {
 		mapView.currentStatus=mapView.STATUS_MOVE;
 		mapView.roadPoints=roadNodes;
 		mapView.invalidate();
+	}
+	/**
+	 * 在地图上展示相应的Building
+	 */
+	private void showBuildingInMap(Building building){
+		Point curLonLat=building.getCenter();
+		Point screenPoint=convertCoordinate.getScreenPointFromLonLat(curLonLat, mapView);
+		
+		mapView.moveDX=mapView.ScreenWidth/2-screenPoint.getX();
+		mapView.moveDY=mapView.ScreenHeight/2-screenPoint.getY();
+		mapView.currentStatus=mapView.STATUS_MOVE;
+		mapView.building=building;
+		mapView.invalidate();
+		
+		
+	    FragmentTransaction ft=fm.beginTransaction();
+	    BuildingDetailFragment bdf=new BuildingDetailFragment(building);
+	    if(fm.findFragmentByTag("PoiDetailFragment")!=null){
+	    	ft.replace(R.id.poi_detail_layout, bdf, "PoiDetailFragment");
+	    }else {
+	    	 ft.add(R.id.poi_detail_layout, bdf,"PoiDetailFragment");
+		}
+	    
+	    ft.commit();	
 	}
 	/**
 	 * 在地图上展示相应的POI
@@ -151,15 +227,21 @@ public class MapActivity extends Activity {
 		
 		
 	    FragmentTransaction ft=fm.beginTransaction();
-/*	    ft.setCustomAnimations(android.R.animator.fade_in,  
-                android.R.animator.fade_out);*/
 	    PoiDetailFragment pdf=new PoiDetailFragment(poi);
 	    if(fm.findFragmentByTag("PoiDetailFragment")!=null){
 	    	ft.replace(R.id.poi_detail_layout, pdf, "PoiDetailFragment");
 	    }else {
 	    	 ft.add(R.id.poi_detail_layout, pdf,"PoiDetailFragment");
 		}
-	    
-	    ft.commit();	
+	    ft.commit();
 	}
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		mapView.poiManager.close();
+		mapView.buildingManager.close();
+		mapView.pathPlanManager.close();
+	}
+	
 }

@@ -1,16 +1,22 @@
 package com.pkumap.activity;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.RoadNode;
+import com.pkumap.util.BuildingManager;
 import com.pkumap.util.ConvertCoordinate;
 import com.pkumap.util.ImageLoader;
+import com.pkumap.util.PathPlanManager;
 import com.pkumap.util.PoiManager;
 import com.zdx.pkumap.R;
 
+import android.R.integer;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -26,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -101,10 +108,6 @@ public class MapView extends View {
 	 */
 	private int flag=0;
 	/**
-	 * 缩放的累计
-	 */
-	private float scaleNum=1f;
-	/**
 	 * 当前地图的层级
 	 */
 	public int level=1;
@@ -163,7 +166,7 @@ public class MapView extends View {
 	/**
 	 * 记录单次滑动，lastFingerDis/curFingerDis
 	 */
-	private float singleScaleLevel;
+	public float singleScaleLevel=1f;
 	/**
 	 * 判断是否开始缩放，记下初始地图的mapDX，mapDY
 	 */
@@ -171,7 +174,15 @@ public class MapView extends View {
 	/**
 	 * 处理POI业务的管理类
 	 */
-	private PoiManager poiManager;
+	public PoiManager poiManager;
+	/**
+	 * 处理Building业务的管理类
+	 */
+	public BuildingManager buildingManager;
+	/**
+	 * 处理路径规划的管理类
+	 */
+	public PathPlanManager pathPlanManager;
 	/**
 	 * 坐标转换类
 	 */
@@ -185,6 +196,10 @@ public class MapView extends View {
 	 */
 	public Poi poi;
 	/**
+	 * 当前3D地图上有标注的Building
+	 */
+	public Building building;
+	/**
 	 * 当前地图上有路径
 	 */
 	public ArrayList<RoadNode> roadPoints;
@@ -193,6 +208,26 @@ public class MapView extends View {
 	 */
 	public Context context;
 	private FragmentManager fmView;
+	/**
+	 * 地图的当前类型（二维或者三维）
+	 */
+	public String map_type="2dmap";
+	/**
+	 * 将MapActivity传过来
+	 */
+	private MapActivity mapActivity;
+	/**
+	 * 记录当手指触屏时的位置
+	 */
+	private float downX,downY;
+	/**
+	 * 手指按下的时间
+	 */
+	private long downtime;
+	/**
+	 * 手指抬起的时间
+	 */
+	private long uptime;
 	public MapView(Context context,AttributeSet set) {
 		super(context,set);
 		this.context=context;
@@ -214,7 +249,9 @@ public class MapView extends View {
 	    currentStatus = STATUS_INIT;
 	    isStartZoom=false;
 	    poiManager=new PoiManager(context);
-	    MapActivity mapActivity=(MapActivity) context;
+	    buildingManager=new BuildingManager(context);
+	    pathPlanManager=new PathPlanManager(context);
+	    mapActivity=(MapActivity) context;
 	    if(null!=mapActivity.fm){
 	    	fmView=mapActivity.fm;
 	    }else{
@@ -257,6 +294,7 @@ public class MapView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		this.canvas=canvas;
+		Log.i("zdx", ""+currentStatus);
 		switch(currentStatus){
 		case STATUS_MOVE:
 			move();
@@ -268,6 +306,7 @@ public class MapView extends View {
 			zoom_summer();
 			break;
 		}
+		
 	}
 	/**
 	 * 判断地图的边界值
@@ -302,8 +341,14 @@ public class MapView extends View {
 		makeCurBound();
 		//在Canvas上绘图
 		DrawVisibleMap();
-		if(poi!=null)
-		DrawPoiMarker(poi);
+		if(poi!=null&&"2dmap".equals(this.map_type)){
+			DrawPoiMarker(poi);
+			
+		}
+		if(building!=null&&"3dmap".equals(this.map_type)){
+			DrawBuildingMarker(building);
+			
+		}
 		if(roadPoints.size()>0){
 			DrawPathInMap(roadPoints);
 		}
@@ -403,8 +448,14 @@ public class MapView extends View {
 			
 			DrawVisibleMap(canvas);	
 		}
-		if(poi!=null){
+		if(poi!=null&&"2dmap".equals(this.map_type)){
 			DrawPoiMarker(poi);
+		}
+		if(building!=null&&"3dmap".equals(this.map_type)){
+			DrawBuildingMarker(building);
+		}
+		if(roadPoints.size()>0){
+			DrawPathInMap(roadPoints);
 		}
 	}
 	/**
@@ -428,7 +479,6 @@ public class MapView extends View {
 				mapDY=preZoomMapDY*2;
 				
 				flag=0;
-				scaleNum=1f;
 				scaleLevel=1f;
 				
 			}else{
@@ -447,7 +497,6 @@ public class MapView extends View {
 				mapDY=preZoomMapDY/2;
 					
 				flag=0;
-				scaleNum=1f;
 				scaleLevel=1f;
 			}else{
 				level=1;
@@ -506,10 +555,17 @@ public class MapView extends View {
 		makeCurBound();
 		Log.i("InitMap", "left:"+left+",right:"+right+",top:"+top+",bottom:"+bottom);
 		DrawVisibleMap(canvas);
-		if(poi!=null){
+		if(poi!=null&&"2dmap".equals(this.map_type)){
 			DrawPoiMarker(poi);
 		}
+		if(building!=null&&"3dmap".equals(this.map_type)){
+			DrawBuildingMarker(building);
+		}
+		if(roadPoints.size()>0){
+			DrawPathInMap(roadPoints);
+		}
 	}
+	public int a=0;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -520,28 +576,78 @@ public class MapView extends View {
 			 }
 			 break;
 		 case MotionEvent.ACTION_DOWN:
-       	 Log.i(TAG,"ACTION_DOWN");
-       	 preX=event.getX();
-       	 preY=event.getY();
-       	 Poi curPoi=getPoiFromLocation(preX,preY);
-       	 if(null!=curPoi){
-  //     		Toast.makeText(this.getContext(),"坐标：x:"+preX+",y:"+preY+",博雅塔",Toast.LENGTH_SHORT).show();
-  //     		Toast.makeText(this.getContext(),curPoi.getName(),Toast.LENGTH_SHORT).show();
-       		ShowPoiDetailInMap(curPoi);
-       	 }else{
-//       		 HidePoiMarkerAndDetail();
-       		
-       	 }
-//       Toast.makeText(MapActivity.this,"坐标：x:"+preX+",y:"+preY+",mapDX:"+mapDX+",mapDY:"+mapDY,Toast.LENGTH_SHORT).show();
-//          	 showPopUp(mapView,preX,preY);
-       	 Log.i("preXY","preX="+preX+",preY="+preY);
+			 downtime=System.currentTimeMillis();
+			 Log.i(TAG,"ACTION_DOWN");
+			 preX=event.getX();
+			 preY=event.getY();
+			 downX=event.getX();
+			 downY=event.getY();
+       	
+			 Log.i("preXY","preX="+preX+",preY="+preY);
             break;
         case MotionEvent.ACTION_UP:
-       	 Log.i(TAG,"ACTION_UP");
-       	 curX=event.getX();
-       	 curY=event.getY();
-       	 
-            break;
+        	uptime=System.currentTimeMillis();
+        	Log.i("DTime", "uptime-downtime:"+(uptime-downtime));
+        	curX=event.getX();
+       	 	curY=event.getY();
+       	 	Log.i("DXYUPDOWN", "curX-preX:"+(curX-preX)+",curY-preY:"+(curY-preY));
+        	if((uptime-downtime)<150){
+        		 if("3dmap".equals(this.map_type)){
+        	       		Building curBuilding=getBuildingFromLocation(downX, downY);
+        	       		if(null!=curBuilding){
+        	       //			Toast.makeText(this.getContext(),curBuilding.getName(),Toast.LENGTH_SHORT).show();
+        	       			ShowBuildingDetailInMap(curBuilding);
+        	       		}
+        	       	 }else{
+        	       		 Poi curPoi=getPoiFromLocation(downX,downY);
+        	       		 if(null!=curPoi){
+        	       			 ShowPoiDetailInMap(curPoi);
+        	       		 }
+        	       	 }
+        		
+        	}else {
+        		
+           	 	float speedX=(curX-downX)/(uptime-downtime);
+           	 	float speedY=(curY-downY)/(uptime-downtime);
+           	 	float dxy=Math.abs(speedY/speedX);
+           	 	if(Math.abs(speedX)>0.5||Math.abs(speedY)>0.5){
+           	 	Log.i("SpeedXY", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
+           	 		while(Math.abs(speedX)>0.0001||Math.abs(speedY)>0.0001){
+           	 		
+           	 			speedX*=0.95;
+	           	 		speedY*=0.95;
+	           	 		
+		           	 	moveDX=speedX*200;
+	           	 		moveDY=speedY*200;
+	           	 		currentStatus = STATUS_MOVE;
+	           	 		invalidate();
+	           	 		
+           	 		}
+           	 		Log.i("zhangdx", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
+           	 	}
+          /* 	 	while(Math.abs(speedX)>0.5||Math.abs(speedY)>0.5){
+           	 		Log.i("SpeedXY", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
+           	 		if(Math.abs(speedX)>0.1&&speedX<0){
+           	 			speedX+=0.02;
+           	 		}else if(Math.abs(speedX)>0.1&&speedX>0){
+           	 			speedX-=0.02;
+           	 		}
+           	 		
+           	 		if(Math.abs(speedY)>0.1&&speedY<0){
+           	 			speedY+=0.02*dxy;
+           	 		}else if(Math.abs(speedY)>0.1&&speedY>0){
+           	 			speedY-=0.02*dxy;
+           	 		}
+           	 		moveDX=speedX*200;
+           	 		moveDY=speedY*200;
+           	 		currentStatus = STATUS_MOVE;
+           	 		invalidate();
+           	 	}*/
+			}
+       	 	Log.i(TAG,"ACTION_UP");
+       	 	
+       	 	break;
+           
         case MotionEvent.ACTION_POINTER_UP:
        	 Log.i(TAG,"ACTION_POINTER_UP");
        	 	//lastFingerDis=-1;
@@ -549,6 +655,7 @@ public class MapView extends View {
         case MotionEvent.ACTION_MOVE:
        	 Log.i(TAG,"ACTION_MOVE");
        	 if(event.getPointerCount()==1){
+       		 
        		 curX=event.getX();
         	 curY=event.getY();
           	 Log.i("curXY", "curX:"+curX+",curY:"+curY);
@@ -589,6 +696,7 @@ public class MapView extends View {
 	 */
 	public void HidePoiMarkerAndDetail(){
 		 poi=null;
+		 building=null;
    		 this.currentStatus=STATUS_INIT;
    		 invalidate();
    		 
@@ -616,6 +724,78 @@ public class MapView extends View {
 	//	canvas.restore();
 	}
 	/**
+	 * 在地图上对应位置添加一个Building的标注,同时要高亮显示该建筑
+	 * @param building
+	 */
+	public void DrawBuildingMarker(Building building){
+		Point curLonLat=building.getCenter();
+		Point screenPoint=convertCoordinate.getScreenPointFromLonLat(curLonLat, this);
+		
+		Bitmap marker=BitmapFactory.decodeResource(getResources(), R.drawable.marker);
+		canvas.drawBitmap(marker, screenPoint.getX()-8,screenPoint.getY()-27,null);
+		MakeBuildingHighLight(building);
+	}
+	/**
+	 * 高亮显示相应的建筑
+	 * @param building
+	 */
+	public void MakeBuildingHighLight(Building building){
+		ArrayList<Point> coordinates=building.getCoordinates();
+		
+		ArrayList<Point> newCoordinates=new ArrayList<Point>();
+		for(int i=0;i<coordinates.size();i++){
+			Point point=new Point();
+			float x=coordinates.get(i).getX();
+			float y=coordinates.get(i).getY();
+			
+			point.setX(x);
+			point.setY(y);
+			Point newPoint=new Point();
+			newPoint=convertCoordinate.getScreenPointFromLonLat(point, this);
+			newCoordinates.add(newPoint);
+		}
+		
+		Paint paint=new Paint();
+		paint.setAntiAlias(true);   
+		paint.setColor(Color.YELLOW);
+		paint.setAlpha(80);
+		paint.setStyle(Paint.Style.FILL_AND_STROKE);
+		paint.setStrokeWidth(2);
+		
+		Path path=new Path();
+		Point start=newCoordinates.get(0);
+		path.moveTo(start.getX(), start.getY());
+		for(int i=1;i<newCoordinates.size();i++){
+			Point midPoint=newCoordinates.get(i);
+			path.lineTo(midPoint.getX(), midPoint.getY());
+		}
+		path.close();
+		canvas.drawPath(path, paint);
+		
+	}
+	/**
+	 * 在3D地图上显示相应的Marker，同时在fragment上显示详细的Building信息，同时将该Building高亮显示
+	 * @param curBuilding
+	 */
+	private void ShowBuildingDetailInMap(Building curBuilding){
+		building=curBuilding;
+		this.currentStatus=STATUS_INIT;
+		invalidate();
+		
+		Fragment curFragment=fmView.findFragmentByTag("PoiDetailFragment");
+		FragmentTransaction ft=fmView.beginTransaction();
+		BuildingDetailFragment bdf=new BuildingDetailFragment(building);
+		if(curFragment!=null){
+   			ft.replace(R.id.poi_detail_layout, bdf, "PoiDetailFragment");
+   			if(!curFragment.isVisible()){
+   				ft.show(curFragment);
+   			}
+   		}else{
+   			ft.add(R.id.poi_detail_layout, bdf, "PoiDetailFragment");
+   		}
+   		ft.commit();
+	}
+	/**
 	 * 在地图上显示相应的的Marker，同时在fragment上显示详细的Poi信息
 	 * @param poi
 	 */
@@ -624,7 +804,6 @@ public class MapView extends View {
 		this.currentStatus=STATUS_INIT;
   		invalidate();
 		
-		MapActivity mapActivity=(MapActivity) context;
 		Fragment curFragment=fmView.findFragmentByTag("PoiDetailFragment");
    		FragmentTransaction ft=fmView.beginTransaction();
    		PoiDetailFragment pdf=new PoiDetailFragment(poi);
@@ -668,9 +847,25 @@ public class MapView extends View {
 		path.moveTo(start.getX(), start.getY());
 		for(int i=1;i<pathPoints.size();i++){
 			Point midPoint=pathPoints.get(i);
+//			Bitmap marker=BitmapFactory.decodeResource(getResources(), R.drawable.marker);
+//			canvas.drawBitmap(marker, midPoint.getX()-8,midPoint.getY()-27,null);
 			path.lineTo(midPoint.getX(), midPoint.getY());
+			
 		}
 		canvas.drawPath(path, paint);
+	}
+	/**
+	 * 在三维地图上获取当前位置是否在Building范围内
+	 * @param x 手机屏幕上当前点的X坐标
+	 * @param y 手机屏幕上当前点的y坐标
+	 * @return
+	 */
+	private Building getBuildingFromLocation(float x,float y){
+		int flagScale=getScaleFlag(level);
+		Point curScreenPoint=new Point(x,y);
+		Point lonLatPoint=convertCoordinate.getLonLatFromScreen(curScreenPoint, this);
+		Log.i("LonLatPoint","FlagScale:"+flagScale+",ScaleLevel:"+scaleLevel+",XY"+x+","+y+",lonlat:"+lonLatPoint.getX()+","+lonLatPoint.getY());
+		return buildingManager.getBuildingByBound(lonLatPoint);
 	}
 	/**
 	 * 当前手点下的位置是否在poi的显示范围
@@ -766,6 +961,7 @@ public class MapView extends View {
 				String url="http://192.168.0.5:8083/pkumap/map?level="+level+"&x="+x+"&y="+y+"&type=2dmap";
 				Log.i("URL",url);
 				bitmap=readBitmapFromAsset(level,x,y);
+				if(bitmap==null)bitmap=readBitmapFromAsset();
 				Log.i("startXY","startX:"+startX+",startY:"+startY+"x:"+x+",y:"+y);
 				if(bitmap!=null){
 					makeDstRect(x,y);
@@ -786,6 +982,7 @@ public class MapView extends View {
 				String url="http://192.168.0.5:8083/pkumap/map?level="+level+"&x="+x+"&y="+y+"&type=2dmap";
 				Log.i("URL",url);
 				bitmap=readBitmapFromAsset(level,x,y);
+				if(bitmap==null)bitmap=readBitmapFromAsset();
 				Log.i("startXY","startX:"+startX+",startY:"+startY+"x:"+x+",y:"+y);
 				if(bitmap!=null){
 					makeDstRect(x,y);
@@ -826,33 +1023,83 @@ public class MapView extends View {
 		Log.i("DstRect","dstLeft:"+dstRect.left+",dstRight:"+dstRect.right+",dstTop:"+dstRect.top+",dstBottom:"+dstRect.bottom);
 	}
 	/**
+	 * 按指定的路径读取位图资源
+	 * @param path
+	 * @return
+	 * @throws IOException 
+	 */
+	public Bitmap readBitmapFromAsset(){
+		String path="map3d/blank.jpg";
+		Bitmap bitmap=null;
+		bitmap=imageLoader.getBitmapFromMemoryCache(path);
+		InputStream inputStream=null;
+		if(bitmap!=null){
+			Log.i("MemoryCache",path);
+			return bitmap;
+		}else{
+			try{
+				inputStream=getResources().getAssets().open(path);
+				if(inputStream!=null){
+					bitmap=BitmapFactory.decodeStream(inputStream);
+					imageLoader.addBitmapToMemoryCache(path, bitmap);
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}finally{
+				try{
+					if(inputStream!=null){
+						inputStream.close();
+					}	
+				}catch(IOException ex){
+					ex.printStackTrace();
+				}
+			}
+		}
+		return bitmap;
+	}
+	/**
 	 * 从本地读取文件
 	 * @param level
 	 * @param x
 	 * @param y
 	 * @return
+	 * @throws IOException 
 	 */
-	public Bitmap readBitmapFromAsset(int level,int x,int y){
+	public Bitmap readBitmapFromAsset(int level,int x,int y) {
 		Bitmap bitmap=null;
-		String bitmapUrl="map3d/"+level+"/"+x+","+y+".jpg";
-//		String bitmapUrl="map2d/"+level+"/"+y+"_"+x+".png";
+		String bitmapUrl="";
+		if("3dmap".equals(map_type)){
+			bitmapUrl="map3d/"+level+"/"+x+","+y+".jpg";
+		}
+		if("2dmap".equals(map_type)){
+			bitmapUrl="map2d/"+level+"/"+y+"_"+x+".png";
+		}
 		bitmap=imageLoader.getBitmapFromMemoryCache(bitmapUrl);
+		InputStream inputStream=null;
 		try{	
 			if(bitmap!=null){
 				Log.i("MemoryCache",bitmapUrl);
-				
 				return bitmap;
 			}else{
-				InputStream inputStream=getResources().getAssets().open(bitmapUrl);
+				inputStream=getResources().getAssets().open(bitmapUrl);
 				if(inputStream!=null){
-					bitmap=BitmapFactory.decodeStream(inputStream);
+					bitmap=BitmapFactory.decodeStream(inputStream);	
+					bitmap=BitmapFactory.decodeStream(inputStream);	
 					imageLoader.addBitmapToMemoryCache(bitmapUrl, bitmap);
-					inputStream.close();
 				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();
+		}finally{
+			try{
+				if(inputStream!=null){
+					inputStream.close();
+				}			
+			}catch(IOException ex){
+				ex.printStackTrace();
+			}	
 		}
 		return bitmap;
 	}
+	
 }
