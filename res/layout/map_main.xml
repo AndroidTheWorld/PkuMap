@@ -26,6 +26,42 @@
 	      android:focusable="false"
 	      android:hint="搜索" />
    </LinearLayout>
+   <LinearLayout 
+       android:id="@+id/zoom"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       android:layout_alignTop="@id/search_layout"
+       android:layout_marginTop="50dp"
+       android:layout_alignLeft="@id/search_layout">
+       <ImageView 
+           android:id="@+id/zoom_in"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:src="@drawable/zoom_in"/>
+        <ImageView 
+           android:id="@+id/zoom_out"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:src="@drawable/zoom_out"
+           />
+   </LinearLayout>
+   <LinearLayout
+       android:id="@+id/change_layer"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       android:layout_alignTop="@id/search_layout"
+       android:layout_marginTop="60dp"
+       android:layout_alignRight="@id/search_layout">
+       <ImageView
+           android:id="@+id/layers"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:src="@drawable/layers"
+           android:background="@drawable/bg_border"
+           android:padding="3dp"/>   
+   </LinearLayout>
     <LinearLayout
                 android:id="@+id/bottomList"
                 android:layout_width="fill_parent"
@@ -94,7 +130,7 @@
        android:orientation="vertical"
        android:background="@android:color/white"
        android:layout_alignBottom="@id/mapView"
-       android:layout_marginBottom="10dp"
+       android:layout_marginBottom="0dp"
        android:layout_marginLeft="0dp"
        android:layout_marginRight="0dp"></LinearLayout>
 </RelativeLayout>
