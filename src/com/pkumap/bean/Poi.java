@@ -12,11 +12,11 @@ public class Poi implements Parcelable{
 	private String wd;
 	private String desc;
 	private Point center;
-	
+	private Point  gps;
 	public Poi(){}
 	
 	public Poi(int id,String name,String addr,int layer,
-			String wd,String desc,Point center){
+			String wd,String desc,Point center,Point gps){
 		this.id=id;
 		this.name=name;
 		this.addr=addr;
@@ -24,6 +24,7 @@ public class Poi implements Parcelable{
 		this.wd=wd;
 		this.desc=desc;
 		this.center=center;
+		this.gps=gps;
 	}
 	public int getId() {
 		return id;
@@ -89,6 +90,16 @@ public class Poi implements Parcelable{
 		this.center = center;
 	}
 
+	
+	public Point getGps() {
+		return gps;
+	}
+
+	public void setGps(Point gps) {
+		this.gps = gps;
+	}
+
+
 	/** 
      * 序列化实体类 
      */  
@@ -101,7 +112,8 @@ public class Poi implements Parcelable{
         	poi.desc=source.readString();
         	poi.layer=source.readInt();
         	poi.wd=source.readString();
-        	poi.center=source.readParcelable(Point.class.getClassLoader());  
+        	poi.center=source.readParcelable(Point.class.getClassLoader());
+        	poi.gps=source.readParcelable(Point.class.getClassLoader());
             return poi;  
         }  
   
@@ -125,6 +137,7 @@ public class Poi implements Parcelable{
 		dest.writeInt(layer);
 		dest.writeString(wd);
 		dest.writeParcelable(center, 0);
+		dest.writeParcelable(gps, 0);
 	}
 	
 	
