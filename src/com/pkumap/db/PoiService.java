@@ -1,9 +1,11 @@
 package com.pkumap.db;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
+import com.pkumap.bean.PointLonLat;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -74,7 +76,6 @@ public class PoiService {
 	 */
 	public ArrayList<String> getPoiNameFromDB(){
 		ArrayList<String> poiNames=new ArrayList<String>(); 
-		
 		String sql_select="select distinct name from poi";
 		Cursor cursor=db.rawQuery(sql_select, null);
 		while(cursor.moveToNext()){
@@ -101,12 +102,19 @@ public class PoiService {
 		db.execSQL(update_sql);
 	}
 	/**
-	 * 更新POI数据，添加PointID字段
+	 * 更新POI数据，添加PointID字段的数据
 	 */
 	public void updatePoiAddPointId(int pointid,int id){
 		String update_sql="update poi set pointid=? where id=?";
 		String[] args=new String[]{String.valueOf(pointid),String.valueOf(id)};
 		db.execSQL(update_sql, args);
+	}
+	/**
+	 * 更新POI的表结构，添加GPS字段
+	 */
+	public void updatePoiAddGps(){
+		String update_sql="ALTER TABLE poi ADD COLUMN gps_y REAL";
+		db.execSQL(update_sql);
 	}
 	/**
 	 * 根据id来获取POI
@@ -134,6 +142,63 @@ public class PoiService {
 		}
 		cursor.close();
 		return poi;
+	}
+	/**
+	 * 获取所有的POI数据
+	 */
+	public ArrayList<Poi> getAllPoi(){
+		ArrayList<Poi> pois=new ArrayList<Poi>();
+		String select_sql="select * from poi";
+		Cursor cursor=db.rawQuery(select_sql, null);
+		while(cursor.moveToNext()){
+			Poi poi=new Poi();
+			poi.setId(cursor.getInt(cursor.getColumnIndex("id")));
+			poi.setName(cursor.getString(cursor.getColumnIndex("name")));
+			poi.setAddr(cursor.getString(cursor.getColumnIndex("addr")));
+			poi.setDesc(cursor.getString(cursor.getColumnIndex("desc")));
+			poi.setLayer(cursor.getInt(cursor.getColumnIndex("layer")));
+			poi.setWd(cursor.getString(cursor.getColumnIndex("wd")));
+			
+			Point center=new Point();
+			center.setX(cursor.getFloat(cursor.getColumnIndex("center_x")));
+			center.setY(cursor.getFloat(cursor.getColumnIndex("center_y")));
+			poi.setCenter(center);
+			
+			pois.add(poi);
+		}
+		cursor.close();
+		return pois;
+	}
+	/**
+	 * 获取所有POI的中心点的本地坐标
+	 * @return
+	 */
+	public HashMap<Integer, PointLonLat> getCenterFromAllPoi(){
+		HashMap<Integer, PointLonLat> lonlats=new HashMap<Integer, PointLonLat>();
+		String select_sql="select id,center_x,center_y from poi";
+		Cursor cursor=db.rawQuery(select_sql, null);
+		while(cursor.moveToNext()){
+			int poiId=cursor.getInt(cursor.getColumnIndex("id"));
+			double center_x=cursor.getDouble(cursor.getColumnIndex("center_x"));
+			double center_y=cursor.getDouble(cursor.getColumnIndex("center_y"));
+			PointLonLat center=new PointLonLat(center_x, center_y);
+			lonlats.put(poiId, center);
+		}
+		cursor.close();
+		return lonlats;
+	}
+	/**
+	 * 更新GPS坐标
+	 * @param poiId
+	 * @param gpsPoint
+	 */
+	public void updateGpsXYInPoi(int poiId,PointLonLat gpsPoint){
+		double gps_x=gpsPoint.getX();
+		double gps_y=gpsPoint.getY();
+		String update_sql="update poi set gps_x=?,gps_y=? where id=?";
+		String[] args=new String[]{String.valueOf(gps_x),String.valueOf(gps_y),String.valueOf(poiId)};
+		
+		db.execSQL(update_sql, args);
 	}
 	/**
 	 * 根据中心点以及X,Y上的偏差获取POI
