@@ -49,10 +49,10 @@ public class PathPlanService {
 	 * @param id
 	 * @return
 	 */
-	public RoadNode getRoadNodeById(int id){
+	public RoadNode getRoadNodeById(int id,String map_type){
 		RoadNode roadNode=null;
-		String select_sql="select * from RoadNode where id=?";
-		String[] args=new String[]{String.valueOf(id)};
+		String select_sql="select * from RoadNode where id=? and type=?";
+		String[] args=new String[]{String.valueOf(id),map_type};
 		Cursor cursor=db.rawQuery(select_sql, args);
 		if(cursor.moveToNext()){
 			roadNode=new RoadNode();
