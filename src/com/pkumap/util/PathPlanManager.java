@@ -41,8 +41,8 @@ public class PathPlanManager {
 	 * @param id
 	 * @return
 	 */
-	public RoadNode getRoadNodeById(int id){
-		return pathPlanService.getRoadNodeById(id);
+	public RoadNode getRoadNodeById(int id,String map_type){
+		return pathPlanService.getRoadNodeById(id,map_type);
 	}
 	/**
 	 * 导入路径规划的路的信息
