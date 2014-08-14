@@ -1,8 +1,11 @@
 package com.pkumap.eventlistener;
 
 import com.pkumap.activity.MapActivity;
+import com.pkumap.activity.SearchActivity;
+import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
+import com.pkumap.util.BuildingManager;
 import com.pkumap.util.PoiManager;
 import com.zdx.pkumap.R;
 
@@ -15,13 +18,15 @@ import android.widget.AutoCompleteTextView;
 
 public class SearchPoiOnClickListener implements OnClickListener {
 	private PoiManager poiManager;
+	private BuildingManager buildingManager;
 	private AutoCompleteTextView poi_txt=null;
-	private Activity eventActivity;
+	private SearchActivity eventActivity;
 	public final static int RESULT_CODE=1;
-	public SearchPoiOnClickListener(Activity targetActivity,PoiManager poiManagerArg){
+	public SearchPoiOnClickListener(SearchActivity targetActivity){
 		this.eventActivity=targetActivity;
 //		poiManager=new PoiManager(eventActivity.getApplicationContext());
-		this.poiManager=poiManagerArg;
+		this.poiManager=targetActivity.poiManager;
+		this.buildingManager=targetActivity.buildingManager;
 		poi_txt=(AutoCompleteTextView) eventActivity.findViewById(R.id.poi_search_txt);
 	}
 	@Override
@@ -39,20 +44,20 @@ public class SearchPoiOnClickListener implements OnClickListener {
 	 */
 	private void goToMapWithPoiName(){
 		String poiName=poi_txt.getText().toString();
-		Poi poi=poiManager.getPoiByName(poiName);
-		
 		Bundle bundle=new Bundle();
 		bundle.putString("poi_name", poiName);
-		bundle.putParcelable("poi", poi);
+		if("3dmap".equals(eventActivity.search_map_type)){
+			Building building=buildingManager.getBuildingByName(poiName);
+			bundle.putParcelable("building", building);
+		}else{
+			Poi poi=poiManager.getPoiByName(poiName);
+			bundle.putParcelable("poi", poi);
+		}
 		
-/*		Bundle bundle=new Bundle();
-		bundle.putString("key", "北京");*/
 		
 		Intent intent=new Intent();
 		intent.setClass(eventActivity,MapActivity.class);
 		intent.putExtras(bundle);
-/*		Bundle test=bundle.getParcelable("poi");
-		Point point=test.getParcelable("center");*/
 		eventActivity.setResult(Activity.RESULT_OK, intent);
 		eventActivity.finish();
 	}
