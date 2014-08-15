@@ -222,14 +222,16 @@ public class PoiManager {
 	 * @param local_y
 	 */
 	public HashMap<Integer, PointLonLat> ConvertLocalCoordToGPS(){
-		HashMap<Integer, PointLonLat> localPoints=poiService.getCenterFromAllPoi();
+//		HashMap<Integer, PointLonLat> localPoints=poiService.getCenterFromAllPoi();
 //		WriteHashMapToFile(localPoints, "/mnt/sdcard/convertLonLat/localLonLat.txt", "localLonLat");
 		
-		HashMap<Integer,PointLonLat> baiduMercator=ConvertLocalCoordToMercator(localPoints);
+//		HashMap<Integer,PointLonLat> baiduMercator=ConvertLocalCoordToMercator(localPoints);
 //		WriteHashMapToFile(baiduMercator, "/mnt/sdcard/convertLonLat/baiduMercator.txt", "baiduMercator");
 		
-		HashMap<Integer, PointLonLat> baiduLonLat=ConvertMercatorToLonLat(baiduMercator);
-		WriteHashMapToFile(baiduLonLat, "/mnt/sdcard/convertLonLat/baiduLonLat", "baiduLonLat");
+//		HashMap<Integer, PointLonLat> baiduLonLat=ConvertMercatorToLonLat(baiduMercator);
+//		WriteHashMapToFile(baiduLonLat, "/mnt/sdcard/convertLonLat/baiduLonLat.txt", "baiduLonLat");
+		
+		HashMap<Integer, PointLonLat> baiduLonLat=ReadHashMapFromFile("/mnt/sdcard/convertLonLat/baiduLonLat.txt", "baiduLonLat");
 		
 		HashMap<Integer, PointLonLat> gpsLonLat=ConvertLonLatToGPS(baiduLonLat);
 		WriteHashMapToFile(gpsLonLat, "/mnt/sdcard/convertLonLat/gps.txt", "gps");
@@ -272,10 +274,13 @@ public class PoiManager {
 			Log.i("ConvertGPS", ""+(++i)+": "+convertURL);
 			JSONObject convertResult=getConvertResultFromUrl(convertURL);
 			PointLonLat newLonLatPoint=null;
+			PointLonLat gpsPoint=null;
 			if(convertResult!=null){
 				newLonLatPoint=getLonLatFromConvertResult(convertResult);
 			}
-			PointLonLat gpsPoint=convertGpsPoint(oldLonLatPoint, newLonLatPoint);
+			if(newLonLatPoint!=null){
+				gpsPoint=convertGpsPoint(oldLonLatPoint, newLonLatPoint);
+			}
 			if(gpsPoint!=null){
 				gpsLonLat.put(poiId, gpsPoint);
 			}
@@ -304,6 +309,7 @@ public class PoiManager {
 		String baiduURL="http://api.map.baidu.com/geoconv/v1/?coords=%s,%s&from=6&to=5&ak=AC197ef902d4d8cbdc86a22b568ec684";
 		int i=0;
 		while(iterator.hasNext()){
+			
 			int poiId=(Integer) iterator.next();
 			PointLonLat mercatorPoint=baiduMercator.get(poiId);
 			String convertURL=String.format(baiduURL, String.valueOf(mercatorPoint.getX()),String.valueOf(mercatorPoint.getY()));
@@ -344,6 +350,8 @@ public class PoiManager {
 	 */
 	public JSONObject getConvertResultFromUrl(String convertURL){
 		JSONObject result=null;
+		int len=0;
+		StringBuffer buffer=new StringBuffer("");
 		try{
 			URL url=new URL(convertURL);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection(); 
@@ -351,10 +359,18 @@ public class PoiManager {
 			
 			InputStream input=connection.getInputStream();
 			BufferedReader br=new BufferedReader(new InputStreamReader(input));
-			StringBuffer buffer=new StringBuffer();
+			
 			String temp=null;
 			while((temp=br.readLine())!=null){
-				buffer.append(temp);
+				if(len != 0)  // 处理换行符的问题
+                {
+					buffer.append("\r\n"+temp);
+                }
+                else
+                {
+                	buffer.append(temp);
+                }
+                len++;
 			}
 			br.close();
 			input.close();
