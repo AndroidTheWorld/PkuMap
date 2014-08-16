@@ -9,14 +9,15 @@ public class Poi implements Parcelable{
 	private String name;
 	private String addr;
 	private int layer;
+	private int pointId;
 	private String wd;
 	private String desc;
 	private Point center;
-	private Point  gps;
+	private PointLonLat  gps;
 	public Poi(){}
 	
 	public Poi(int id,String name,String addr,int layer,
-			String wd,String desc,Point center,Point gps){
+			String wd,String desc,Point center,PointLonLat gps){
 		this.id=id;
 		this.name=name;
 		this.addr=addr;
@@ -61,6 +62,14 @@ public class Poi implements Parcelable{
 	public void setLayer(int layer) {
 		this.layer = layer;
 	}
+	
+	public int getPointId() {
+		return pointId;
+	}
+
+	public void setPointId(int pointId) {
+		this.pointId = pointId;
+	}
 
 	public String getWd() {
 		return wd;
@@ -91,11 +100,11 @@ public class Poi implements Parcelable{
 	}
 
 	
-	public Point getGps() {
+	public PointLonLat getGps() {
 		return gps;
 	}
 
-	public void setGps(Point gps) {
+	public void setGps(PointLonLat gps) {
 		this.gps = gps;
 	}
 
@@ -111,9 +120,10 @@ public class Poi implements Parcelable{
         	poi.addr=source.readString();
         	poi.desc=source.readString();
         	poi.layer=source.readInt();
+        	poi.pointId=source.readInt();
         	poi.wd=source.readString();
         	poi.center=source.readParcelable(Point.class.getClassLoader());
-        	poi.gps=source.readParcelable(Point.class.getClassLoader());
+        	poi.gps=source.readParcelable(PointLonLat.class.getClassLoader());
             return poi;  
         }  
   
@@ -135,6 +145,7 @@ public class Poi implements Parcelable{
 		dest.writeString(addr);
 		dest.writeString(desc);
 		dest.writeInt(layer);
+		dest.writeInt(pointId);
 		dest.writeString(wd);
 		dest.writeParcelable(center, 0);
 		dest.writeParcelable(gps, 0);
