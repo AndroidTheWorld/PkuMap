@@ -697,6 +697,7 @@ public class MapView extends View {
 	public void HidePoiMarkerAndDetail(){
 		 poi=null;
 		 building=null;
+		 roadPoints.clear();
    		 this.currentStatus=STATUS_INIT;
    		 invalidate();
    		 
@@ -816,6 +817,7 @@ public class MapView extends View {
    			ft.add(R.id.poi_detail_layout, pdf, "PoiDetailFragment");
    		}
    		ft.commit();
+   		
 	}
 	/**
 	 * 在地图上画出相应的路径
