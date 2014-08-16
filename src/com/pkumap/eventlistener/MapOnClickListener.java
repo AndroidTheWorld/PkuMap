@@ -7,6 +7,7 @@ import com.pkumap.activity.MapView;
 import com.pkumap.activity.PathPlanActivity;
 import com.pkumap.activity.SearchActivity;
 import com.pkumap.bean.Poi;
+import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.RoadNode;
 import com.pkumap.util.PathPlanManager;
 import com.pkumap.util.RoadPlan;
@@ -70,6 +71,9 @@ public class MapOnClickListener implements OnClickListener {
 		case R.id.layers:
 			changeLayers();
 			break;
+		case R.id.naviImg:
+			getCurLocationInMap();
+			break;
 		case R.id.three_layer:
 			showOtherMap(R.id.three_layer);
 			break;
@@ -80,7 +84,7 @@ public class MapOnClickListener implements OnClickListener {
 			searchPoi();
 			break;
 		case R.id.poi_go:
-			Toast.makeText(event_Activity, mapView.poi.getName(), Toast.LENGTH_SHORT).show();
+//			Toast.makeText(event_Activity, mapView.poi.getName(), Toast.LENGTH_SHORT).show();
 			goToPoi(mapView.poi);
 			break;
 		case R.id.nearby:
@@ -92,12 +96,41 @@ public class MapOnClickListener implements OnClickListener {
 		}
 	}
 	/**
+	 * 将地图移动到以当前位置为中心（由Gps获取）
+	 */
+	private void  getCurLocationInMap(){
+		if(MapActivity.gpsLonLat!=null){
+			Toast.makeText(event_Activity,"当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY(), Toast.LENGTH_SHORT).show();
+			poi_edit_txt.setText("当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY());
+		}else{
+			Toast.makeText(event_Activity, "当前GPS不可用", Toast.LENGTH_SHORT).show();
+		}
+	}
+	/**
 	 * 从当前位置到POI的位置
 	 * @param poi
 	 */
 	private void goToPoi(Poi poi){
 		RoadPlan roadPlan=new RoadPlan(mapView);
-		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodes("博雅塔", poi.getName(),mapView.map_type);
+//		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodes("博雅塔", poi.getName(),mapView.map_type);
+//		PointLonLat gpsLonLat=new PointLonLat(116.298708,39.993326);//北大西门
+//		PointLonLat gpsLonLat=new PointLonLat(116.306478,39.989591);//理科一号楼(门前)
+//		PointLonLat gpsLonLat=new PointLonLat(116.305530,39.992543);//博雅塔
+//		PointLonLat gpsLonLat=new PointLonLat(116.304821,39.988406); //百年纪念讲堂
+		
+		if(MapActivity.gpsLonLat==null){
+			Toast.makeText(event_Activity, "当前GPS不可用", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		PointLonLat gpsLonLat=new PointLonLat(MapActivity.gpsLonLat.getX(),MapActivity.gpsLonLat.getY()); //百年纪念讲堂
+		
+		int curPointId=roadPlan.getPointIdFromCurGps(gpsLonLat);
+		if(curPointId==-1){
+			Toast.makeText(event_Activity, "当前路径不可达", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodeInPath(curPointId, poi.getPointId(), mapView.map_type);
+//		Toast.makeText(event_Activity,roadNodes.size(), Toast.LENGTH_SHORT).show();
 		event_Activity.showPathInMap(roadNodes);
 	}
 	/**
