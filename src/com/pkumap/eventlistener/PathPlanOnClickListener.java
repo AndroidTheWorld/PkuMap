@@ -91,17 +91,19 @@ public class PathPlanOnClickListener implements OnClickListener {
 	
 	private void importPoiData(){
 		//POI数据操作
-		PoiManager poiManager=new PoiManager(event_Activity.getApplicationContext());
+//		PoiManager poiManager=new PoiManager(event_Activity.getApplicationContext());
 //		poiManager.importPoiFromMongo();
 //		poiManager.updatePoiTable();
 //		poiManager.updatePoiAddGps();
-		poiManager.ConvertToGpsAndUpdateGpsInPoi();
+//		poiManager.ConvertToGpsAndUpdateGpsInPoi();
 //		Poi poi=poiManager.getPoiById(255);
 //		poiManager.updatePoiAddPointID();
 		//路径规划数据操作
-//		PathPlanManager pathPlanManager=new PathPlanManager(event_Activity.getApplicationContext());
+		PathPlanManager pathPlanManager=new PathPlanManager(event_Activity.getApplicationContext());
 //		pathPlanManager.importRoadInfo();
 //		pathPlanManager.importRoadNodeInfo();
+//		pathPlanManager.updateRoadNodeTableAddGps();
+		pathPlanManager.ConvertGpsFromLocalAndUpdateRoadNode();
 
 		//Building数据操作
 //		BuildingManager buildingManager=new BuildingManager(event_Activity.getApplicationContext());
