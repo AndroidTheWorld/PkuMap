@@ -62,6 +62,7 @@
            android:background="@drawable/bg_border"
            android:padding="3dp"/>   
    </LinearLayout>
+   
     <LinearLayout
                 android:id="@+id/bottomList"
                 android:layout_width="fill_parent"
@@ -124,6 +125,21 @@
                 </LinearLayout>
    </LinearLayout>
    <LinearLayout 
+       android:id="@+id/curLocation"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       android:layout_alignBottom="@id/bottomList"
+       android:layout_marginBottom="100dp"
+       android:layout_alignLeft="@id/search_layout">
+       <ImageView
+           android:id="@+id/naviImg"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:src="@drawable/navi"
+         />  
+    </LinearLayout>
+   <LinearLayout 
        android:id="@+id/poi_detail_layout"
        android:layout_width="fill_parent"
        android:layout_height="wrap_content"
@@ -132,5 +148,9 @@
        android:layout_alignBottom="@id/mapView"
        android:layout_marginBottom="0dp"
        android:layout_marginLeft="0dp"
-       android:layout_marginRight="0dp"></LinearLayout>
+       android:layout_marginRight="0dp">
+       
+   </LinearLayout>
+   
+    
 </RelativeLayout>
