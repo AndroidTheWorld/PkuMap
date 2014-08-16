@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.pkumap.activity.MapView;
+import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.Road;
 import com.pkumap.bean.RoadNode;
 
@@ -76,8 +77,7 @@ public class RoadPlan {
 	 * @return
 	 */
 	public ArrayList<RoadNode> getRoadNodes(String start,String end,String map_type){
-		initPathInfo(map_type);
-		dijkstra=new Dijkstra(pathmap);
+		
 		Log.i("ZDX", "zzz");
 		int startId,endId;
 		if("3dmap".equals(map_type)){
@@ -87,14 +87,37 @@ public class RoadPlan {
 			startId=poiManager.getPointIdByName(start);
 			endId=poiManager.getPointIdByName(end);
 		}
+		
+		ArrayList<RoadNode> roadNodes=getRoadNodeInPath(startId, endId, map_type);
+		return roadNodes;
+	}
+	/**
+	 * 根据当前的GPs来获取附近的PointId
+	 * @param gpsLonLat
+	 * @return
+	 */
+	public int getPointIdFromCurGps(PointLonLat gpsLonLat){
+		return pathPlanManager.getPointIdFromCurGps(gpsLonLat);
+	}
+	/**
+	 * 根据起点和终点的ID获取对应的路径上的点
+	 * @param startId
+	 * @param endId
+	 * @return
+	 */
+	public ArrayList<RoadNode> getRoadNodeInPath(int startId,int endId,String map_type){
+		
+		initPathInfo(map_type);
+		dijkstra=new Dijkstra(pathmap);
+		
 		ArrayList<RoadNode> roadNodes=new ArrayList<RoadNode>();
+		
 		ArrayList<Integer> pointids=dijkstra.getShortDistance(startId, endId);
 		String ids="";
 		for(int i=0;i<pointids.size();i++){
 			ids+=pointids.get(i)+",";
 			RoadNode roadNode=pathPlanManager.getRoadNodeById(pointids.get(i),map_type);
 			roadNodes.add(roadNode);
-			
 		}
 		Log.i("IDS", ids);
 		return roadNodes;

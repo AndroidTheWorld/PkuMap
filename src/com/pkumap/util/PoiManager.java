@@ -54,6 +54,14 @@ public class PoiManager {
 		return poiService.getPointIdByName(name);
 	} 
 	/**
+	 * 根据PoiId来获取PointId
+	 * @param poiId
+	 * @return
+	 */
+	public int getPointIdByPoiId(int poiId){
+		return poiService.getPointIdByPoiId(poiId);
+	}
+	/**
 	 * 获取POI的名称
 	 * @return
 	 */
@@ -231,10 +239,13 @@ public class PoiManager {
 //		HashMap<Integer, PointLonLat> baiduLonLat=ConvertMercatorToLonLat(baiduMercator);
 //		WriteHashMapToFile(baiduLonLat, "/mnt/sdcard/convertLonLat/baiduLonLat.txt", "baiduLonLat");
 		
-		HashMap<Integer, PointLonLat> baiduLonLat=ReadHashMapFromFile("/mnt/sdcard/convertLonLat/baiduLonLat.txt", "baiduLonLat");
+//		HashMap<Integer, PointLonLat> baiduLonLat=ReadHashMapFromFile("/mnt/sdcard/convertLonLat/baiduLonLat.txt", "baiduLonLat");
 		
-		HashMap<Integer, PointLonLat> gpsLonLat=ConvertLonLatToGPS(baiduLonLat);
-		WriteHashMapToFile(gpsLonLat, "/mnt/sdcard/convertLonLat/gps.txt", "gps");
+//		HashMap<Integer, PointLonLat> gpsLonLat=ConvertLonLatToGPS(baiduLonLat);
+//		WriteHashMapToFile(gpsLonLat, "/mnt/sdcard/convertLonLat/gps.txt", "gps");
+		
+		HashMap<Integer, PointLonLat> gpsLonLat=ReadHashMapFromFile("/mnt/sdcard/convertLonLat/gps.txt", "gps");
+		
 		return gpsLonLat;
 	}
 	/**
@@ -255,7 +266,14 @@ public class PoiManager {
 	 * @param gpspoint
 	 */
 	public void updateGpsXYInPoi(int poiId,PointLonLat gpsPoint){
-		poiService.updateGpsXYInPoi(poiId, gpsPoint);
+		//做一个简单的微调,在经度范围上加上0.0001，在维度范围上减去0.0002
+		double gps_x=gpsPoint.getX();
+		double gps_y=gpsPoint.getY();
+		gps_x=gps_x+0.0001;
+		gps_y=gps_y-0.0002;
+		Log.i("GPS_UPDATE", "poiId:"+poiId+",gps_x:"+gps_x+",gps_y:"+gps_y);
+		PointLonLat newGpsPoint=new PointLonLat(gps_x, gps_y);
+		poiService.updateGpsXYInPoi(poiId, newGpsPoint);
 	}
 	/**
 	 * 将百度的经纬度坐标转化为真实的Gps坐标
@@ -362,12 +380,9 @@ public class PoiManager {
 			
 			String temp=null;
 			while((temp=br.readLine())!=null){
-				if(len != 0)  // 处理换行符的问题
-                {
+				if(len != 0){
 					buffer.append("\r\n"+temp);
-                }
-                else
-                {
+                }else{
                 	buffer.append(temp);
                 }
                 len++;

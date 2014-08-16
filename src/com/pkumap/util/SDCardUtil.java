@@ -37,8 +37,8 @@ public class SDCardUtil {
 				while ((line = br.readLine()) != null) {
 					sb.append(line);
 				}
-				fis.close();
 				br.close();
+				fis.close();
 				return sb.toString();
 			}
 		} catch (Exception e) {
