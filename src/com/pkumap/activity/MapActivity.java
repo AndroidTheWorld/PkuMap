@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
+import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.RoadNode;
+import com.pkumap.eventlistener.GpsLocationListener;
 import com.pkumap.eventlistener.MapOnClickListener;
 import com.pkumap.eventlistener.SearchPoiOnClickListener;
 import com.pkumap.util.BuildingManager;
@@ -20,6 +22,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -41,8 +44,16 @@ public class MapActivity extends FragmentActivity {
 	private ImageView zoom_in=null;
 	private ImageView zoom_out=null;
 	private ImageView layers=null;
+	private ImageView navi=null;
+	public LocationManager locManager;
+	
+	/**
+	 * 根据Gps获取当前的位置，在不断发生变化，全局供其他定位模块使用
+	 */
+	public static PointLonLat gpsLonLat;
 	
 	private MapOnClickListener mapOnClickListener;
+	private GpsLocationListener gpsLocationListener;
 	private ConvertCoordinate convertCoordinate;
 	public FragmentManager fm;
 	private final static String picurl="http://162.105.30.246:8080/pkumap/map?level=1&x=7&y=7&type=2dmap";
@@ -70,7 +81,10 @@ public class MapActivity extends FragmentActivity {
 	/*	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 			WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
 		setContentView(R.layout.map_main);
+		
 		fm=getFragmentManager();
+		locManager=(LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		
         mapView=(MapView) findViewById(R.id.mapView);
         edit_search=(EditText) findViewById(R.id.poi_edit_search);
         radio_near=(RadioButton) findViewById(R.id.nearby);
@@ -78,9 +92,14 @@ public class MapActivity extends FragmentActivity {
         zoom_in=(ImageView) findViewById(R.id.zoom_in);
         zoom_out=(ImageView) findViewById(R.id.zoom_out);
         layers=(ImageView) findViewById(R.id.layers);
-       
+        navi=(ImageView) findViewById(R.id.naviImg);
+        Location location = locManager
+				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        
+        
         
         mapOnClickListener=new MapOnClickListener(this);
+        gpsLocationListener=new GpsLocationListener(this);
  //       mapView.setOnClickListener(new MapOnClickListener(MapActivity.this));
         edit_search.setOnClickListener(mapOnClickListener);
         radio_near.setOnClickListener(mapOnClickListener);
@@ -88,10 +107,13 @@ public class MapActivity extends FragmentActivity {
         zoom_in.setOnClickListener(mapOnClickListener);
         zoom_out.setOnClickListener(mapOnClickListener);
         layers.setOnClickListener(mapOnClickListener);
-        
+        navi.setOnClickListener(mapOnClickListener);
         
         convertCoordinate=new ConvertCoordinate();
-      
+        
+     // 设置获取一次GPS的定位信息
+     	locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+     			gpsLocationListener);
        
 		// 显示自定义的地图View
 		//	mMapView.setFocusable(true);
