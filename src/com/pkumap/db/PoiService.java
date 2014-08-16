@@ -44,12 +44,18 @@ public class PoiService {
 			poi.setAddr(cursor.getString(cursor.getColumnIndex("addr")));
 			poi.setDesc(cursor.getString(cursor.getColumnIndex("desc")));
 			poi.setLayer(cursor.getInt(cursor.getColumnIndex("layer")));
+			poi.setPointId(cursor.getInt(cursor.getColumnIndex("pointid")));
 			poi.setWd(cursor.getString(cursor.getColumnIndex("wd")));
 			
 			Point center=new Point();
 			center.setX(cursor.getFloat(cursor.getColumnIndex("center_x")));
 			center.setY(cursor.getFloat(cursor.getColumnIndex("center_y")));
 			poi.setCenter(center);
+			
+			PointLonLat gpsLonLat=new PointLonLat();
+			gpsLonLat.setX(cursor.getDouble(cursor.getColumnIndex("gps_x")));
+			gpsLonLat.setY(cursor.getDouble(cursor.getColumnIndex("gps_y")));
+			poi.setGps(gpsLonLat);
 		}
 		cursor.close();
 		return poi;
@@ -63,6 +69,22 @@ public class PoiService {
 		int pointid=-1;
 		String select_sql="select pointid from poi where name=? limit 0,1";
 		String[] args=new String[]{name};
+		Cursor cursor=db.rawQuery(select_sql, args);
+		if(cursor.moveToNext()){
+			pointid=cursor.getInt(cursor.getColumnIndex("pointid"));
+		}
+		cursor.close();
+		return pointid;
+	}
+	/**
+	 * 根据PoiId来获取PointId
+	 * @param poiId
+	 * @return
+	 */
+	public int getPointIdByPoiId(int poiId){
+		int pointid=-1;
+		String select_sql="select pointid from poi where id=? limit 0,1";
+		String[] args=new String[]{String.valueOf(poiId)};
 		Cursor cursor=db.rawQuery(select_sql, args);
 		if(cursor.moveToNext()){
 			pointid=cursor.getInt(cursor.getColumnIndex("pointid"));
@@ -133,12 +155,18 @@ public class PoiService {
 			poi.setAddr(cursor.getString(cursor.getColumnIndex("addr")));
 			poi.setDesc(cursor.getString(cursor.getColumnIndex("desc")));
 			poi.setLayer(cursor.getInt(cursor.getColumnIndex("layer")));
+			poi.setPointId(cursor.getInt(cursor.getColumnIndex("pointid")));
 			poi.setWd(cursor.getString(cursor.getColumnIndex("wd")));
 			
 			Point center=new Point();
 			center.setX(cursor.getFloat(cursor.getColumnIndex("center_x")));
 			center.setY(cursor.getFloat(cursor.getColumnIndex("center_y")));
 			poi.setCenter(center);
+			
+			PointLonLat gpsLonLat=new PointLonLat();
+			gpsLonLat.setX(cursor.getDouble(cursor.getColumnIndex("gps_x")));
+			gpsLonLat.setY(cursor.getDouble(cursor.getColumnIndex("gps_y")));
+			poi.setGps(gpsLonLat);
 		}
 		cursor.close();
 		return poi;
@@ -157,12 +185,18 @@ public class PoiService {
 			poi.setAddr(cursor.getString(cursor.getColumnIndex("addr")));
 			poi.setDesc(cursor.getString(cursor.getColumnIndex("desc")));
 			poi.setLayer(cursor.getInt(cursor.getColumnIndex("layer")));
+			poi.setPointId(cursor.getInt(cursor.getColumnIndex("pointid")));
 			poi.setWd(cursor.getString(cursor.getColumnIndex("wd")));
 			
 			Point center=new Point();
 			center.setX(cursor.getFloat(cursor.getColumnIndex("center_x")));
 			center.setY(cursor.getFloat(cursor.getColumnIndex("center_y")));
 			poi.setCenter(center);
+			
+			PointLonLat gpsLonLat=new PointLonLat();
+			gpsLonLat.setX(cursor.getDouble(cursor.getColumnIndex("gps_x")));
+			gpsLonLat.setY(cursor.getDouble(cursor.getColumnIndex("gps_y")));
+			poi.setGps(gpsLonLat);
 			
 			pois.add(poi);
 		}
@@ -226,12 +260,18 @@ public class PoiService {
 			poi.setAddr(cursor.getString(cursor.getColumnIndex("addr")));
 			poi.setDesc(cursor.getString(cursor.getColumnIndex("desc")));
 			poi.setLayer(cursor.getInt(cursor.getColumnIndex("layer")));
+			poi.setPointId(cursor.getInt(cursor.getColumnIndex("pointid")));
 			poi.setWd(cursor.getString(cursor.getColumnIndex("wd")));
 			
 			Point center=new Point();
 			center.setX(cursor.getFloat(cursor.getColumnIndex("center_x")));
 			center.setY(cursor.getFloat(cursor.getColumnIndex("center_y")));
 			poi.setCenter(center);
+			
+			PointLonLat gpsLonLat=new PointLonLat();
+			gpsLonLat.setX(cursor.getDouble(cursor.getColumnIndex("gps_x")));
+			gpsLonLat.setY(cursor.getDouble(cursor.getColumnIndex("gps_y")));
+			poi.setGps(gpsLonLat);
 		}
 		cursor.close();
 		return poi;
