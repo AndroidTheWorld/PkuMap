@@ -117,12 +117,13 @@ public class MapOnClickListener implements OnClickListener {
 //		PointLonLat gpsLonLat=new PointLonLat(116.306478,39.989591);//理科一号楼(门前)
 //		PointLonLat gpsLonLat=new PointLonLat(116.305530,39.992543);//博雅塔
 //		PointLonLat gpsLonLat=new PointLonLat(116.304821,39.988406); //百年纪念讲堂
+//		PointLonLat gpsLonLat=new PointLonLat(116.30689738,39.9894428837); 
 		
 		if(MapActivity.gpsLonLat==null){
 			Toast.makeText(event_Activity, "当前GPS不可用", Toast.LENGTH_SHORT).show();
 			return;
 		}
-		PointLonLat gpsLonLat=new PointLonLat(MapActivity.gpsLonLat.getX(),MapActivity.gpsLonLat.getY()); //百年纪念讲堂
+		PointLonLat gpsLonLat=new PointLonLat(MapActivity.gpsLonLat.getX(),MapActivity.gpsLonLat.getY()); //Gps数据
 		
 		int curPointId=roadPlan.getPointIdFromCurGps(gpsLonLat);
 		if(curPointId==-1){
