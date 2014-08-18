@@ -99,7 +99,7 @@ public class KalmanLatLong {
 			variance = (1 - K) * variance;
 
 		}
-		newPair = new PointLonLat(lat, lng);
+		newPair = new PointLonLat(lng, lat);
 		return newPair;
 	}
 }
