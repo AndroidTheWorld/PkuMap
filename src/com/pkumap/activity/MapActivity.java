@@ -93,14 +93,9 @@ public class MapActivity extends FragmentActivity {
         zoom_out=(ImageView) findViewById(R.id.zoom_out);
         layers=(ImageView) findViewById(R.id.layers);
         navi=(ImageView) findViewById(R.id.naviImg);
-        Location location = locManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        
-        
-        
+       
         mapOnClickListener=new MapOnClickListener(this);
         gpsLocationListener=new GpsLocationListener(this);
- //       mapView.setOnClickListener(new MapOnClickListener(MapActivity.this));
         edit_search.setOnClickListener(mapOnClickListener);
         radio_near.setOnClickListener(mapOnClickListener);
         radio_pathplan.setOnClickListener(mapOnClickListener);
