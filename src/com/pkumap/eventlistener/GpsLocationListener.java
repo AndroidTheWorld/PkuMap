@@ -51,7 +51,7 @@ public class GpsLocationListener implements LocationListener {
 					Toast.LENGTH_SHORT).show();
 			break;
 		}*/
-		MapActivity.gpsLonLat=null;
+//		MapActivity.gpsLonLat=null;
 //		Toast.makeText(mapActivity, "onStatusChanged",Toast.LENGTH_SHORT).show();
 	}
 
@@ -73,6 +73,7 @@ public class GpsLocationListener implements LocationListener {
 	@Override
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
+		MapActivity.gpsLonLat=null;
 		Toast.makeText(mapActivity, "onProviderDisabled",
 				Toast.LENGTH_SHORT).show();
 	}
