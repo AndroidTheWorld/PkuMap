@@ -35,7 +35,7 @@ public class RoadPlan {
 	private PathPlanManager pathPlanManager;
 	private PoiManager poiManager;
 	private BuildingManager buildingManager;
-	private MapView mapView;
+	public MapView mapView;
 	
 	public RoadPlan(Context context){
 		pathPlanManager=new PathPlanManager(context);
