@@ -3,10 +3,12 @@ package com.pkumap.manager;
 import java.util.ArrayList;
 import java.util.Timer;
 
+import com.pkumap.activity.MapActivity;
 import com.pkumap.bean.RoadNode;
 import com.pkumap.util.NaviTimerMask;
 import com.pkumap.util.RoadPlan;
 
+import android.content.Context;
 import android.os.Handler;
 
 public class TimerManager {
@@ -14,8 +16,10 @@ public class TimerManager {
 	private final long delay=1000;
 	private final long period=10000;//10秒
 	private Handler handler;
-	public TimerManager(Handler handler){
+	private MapActivity context;
+	public TimerManager(Handler handler,MapActivity context){
 		this.handler=handler;
+		this.context=context;
 	}
 
 	/**
@@ -34,7 +38,7 @@ public class TimerManager {
 		if(timer==null){
 			timer=new Timer();
 		}
-		timer.schedule(new NaviTimerMask(TimerManager.this,handler,naviNodes,roadPlan), delay, period);
+		timer.schedule(new NaviTimerMask(TimerManager.this,handler,naviNodes,roadPlan,context), delay, period);
 	}
 	public void stopTimer(){
 		if(timer!=null){
