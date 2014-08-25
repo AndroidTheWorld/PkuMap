@@ -9,10 +9,8 @@ import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.Road;
 import com.pkumap.bean.RoadNode;
-import com.pkumap.util.BuildingManager;
+import com.pkumap.manager.PathPlanManager;
 import com.pkumap.util.Dijkstra;
-import com.pkumap.util.PathPlanManager;
-import com.pkumap.util.PoiManager;
 import com.pkumap.util.RoadPlan;
 import com.zdx.pkumap.R;
 
@@ -25,29 +23,17 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class PathPlanOnClickListener implements OnClickListener {
 	private PathPlanActivity event_Activity;
 	private EditText path_start_edit=null;
 	private EditText path_end_edit=null;
-	private PathPlanManager pathPlanManager;
-	private ArrayList<RoadNode> roadNodes;
-	private ArrayList<Road> roads;
-	/**
-	 * 总共的点数
-	 */
-	private final int pCount = 1000;
-	/**
-	 * 初始化地图信息
-	 */
-	private final int INF = 999999;
-	/**
-	 * 路径规划中的邻接表
-	 */
-	private float[][] pathmap;
-	private Dijkstra dijkstra;
+	private int typeCode;
+	
 	public PathPlanOnClickListener(PathPlanActivity target_Activity){
 		this.event_Activity=target_Activity;
+		this.typeCode=target_Activity.typeCode;
 		this.path_start_edit=(EditText) event_Activity.findViewById(R.id.path_start);
 		this.path_end_edit=(EditText) event_Activity.findViewById(R.id.path_end);
 	}
@@ -73,9 +59,15 @@ public class PathPlanOnClickListener implements OnClickListener {
 		
 		RoadPlan roadPlan=new RoadPlan(event_Activity.pathPlanManager,event_Activity.poiManager,event_Activity.buildingManager);
 		String startStr=path_start_edit.getText().toString();
+		if("".equals(startStr)){
+			startStr=path_start_edit.getHint().toString();
+		}
 		String endStr=path_end_edit.getText().toString();
 		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodes(startStr,endStr,event_Activity.map_type);
-		
+		if(null==roadNodes){
+			Toast.makeText(event_Activity, "无法获取当前位置的路口点信息，请到距路近的位置重试",Toast.LENGTH_SHORT).show();
+			return;
+		}
 		Bundle bundle=new Bundle();
 		bundle.putParcelableArrayList("path", roadNodes);
 		
@@ -85,7 +77,7 @@ public class PathPlanOnClickListener implements OnClickListener {
 //		event_Activity.startActivity(intent);
 		intent.putExtras(bundle);
 
-		event_Activity.setResult(event_Activity.RESULT_PATHPLAN, intent);
+		event_Activity.setResult(typeCode, intent);
 		event_Activity.finish();
 	}
 	
