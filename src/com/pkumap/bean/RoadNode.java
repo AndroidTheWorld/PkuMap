@@ -8,6 +8,8 @@ public class RoadNode implements Parcelable{
 	private int id;
 	private float x;
 	private float y;
+	private double gps_x;
+	private double gps_y;
 	private String type;
 	
 	public RoadNode(){}
@@ -17,7 +19,14 @@ public class RoadNode implements Parcelable{
 		this.y=y;
 		this.type=type;
 	}
-	
+	public RoadNode(int id,float x,float y,double gps_x,double gps_y,String type){
+		this.id=id;
+		this.x=x;
+		this.y=y;
+		this.gps_x=gps_x;
+		this.gps_y=gps_y;
+		this.type=type;
+	}
 	public int getId() {
 		return id;
 	}
@@ -36,6 +45,19 @@ public class RoadNode implements Parcelable{
 	public void setY(float y) {
 		this.y = y;
 	}
+	
+	public double getGps_x() {
+		return gps_x;
+	}
+	public void setGps_x(double gps_x) {
+		this.gps_x = gps_x;
+	}
+	public double getGps_y() {
+		return gps_y;
+	}
+	public void setGps_y(double gps_y) {
+		this.gps_y = gps_y;
+	}
 	public String getType() {
 		return type;
 	}
@@ -51,6 +73,8 @@ public class RoadNode implements Parcelable{
         	roadNode.id=source.readInt();
         	roadNode.x=source.readFloat();
         	roadNode.y=source.readFloat();
+        	roadNode.gps_x=source.readDouble();
+        	roadNode.gps_y=source.readDouble();
         	roadNode.type=source.readString();
             return roadNode;  
         }  
@@ -70,6 +94,8 @@ public class RoadNode implements Parcelable{
 		dest.writeInt(id);
 		dest.writeFloat(x);
 		dest.writeFloat(y);
+		dest.writeDouble(gps_x);
+		dest.writeDouble(gps_y);
 		dest.writeString(type);
 	}
 	
