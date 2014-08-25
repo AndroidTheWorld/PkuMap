@@ -60,7 +60,7 @@ public class MapOnClickListener implements OnClickListener {
         
         naviGpsHandler=new NaviGpsHandler(event_Activity);
 
-        event_Activity.timerManager=new TimerManager(naviGpsHandler);
+        event_Activity.timerManager=new TimerManager(naviGpsHandler,event_Activity);
         
         naviManager=NaviManager.getInstance();
 	}
