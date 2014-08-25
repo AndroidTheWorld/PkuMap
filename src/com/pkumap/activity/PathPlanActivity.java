@@ -52,9 +52,9 @@ public class PathPlanActivity extends Activity {
 		ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(this,
 				android.R.layout.simple_dropdown_item_1line,name);
 		if(MapActivity.RESULT_NAVI==typeCode){
-			path_start_txt.setEnabled(false);
-//			path_start_txt.setAdapter(arrayAdapter);
-//			path_start_txt.setThreshold(1);
+//			path_start_txt.setEnabled(false);
+			path_start_txt.setAdapter(arrayAdapter);
+			path_start_txt.setThreshold(1);
 		}else{
 			path_start_txt.setAdapter(arrayAdapter);
 			path_start_txt.setThreshold(1);
