@@ -10,22 +10,25 @@ import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.RoadNode;
 import com.pkumap.eventlistener.GpsLocationListener;
 import com.pkumap.eventlistener.MapOnClickListener;
-import com.pkumap.eventlistener.SearchPoiOnClickListener;
-import com.pkumap.util.BuildingManager;
+import com.pkumap.manager.AudioManager;
+import com.pkumap.manager.TimerManager;
 import com.pkumap.util.ConvertCoordinate;
-import com.pkumap.util.PoiManager;
+import com.pkumap.util.RoadPlan;
 import com.zdx.pkumap.R;
 
-import android.app.Activity;
+
+
+
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Window;
@@ -37,27 +40,44 @@ import android.widget.Toast;
 
 public class MapActivity extends FragmentActivity {
 	private final static String TAG="MapActivity";
-	private MapView mapView=null;
-	private EditText edit_search=null;
+	
+	public final static int RESULT_PATHPATH=1001;
+	public final static int RESULT_NAVI=1002;
+	private static final int REQ_TTS_STATUS_CHECK = 0;
+	
+	public MapView mapView=null;
+	public EditText edit_search=null;
 	private RadioButton radio_near=null;
 	private RadioButton radio_pathplan=null;
+	private RadioButton radio_navi=null;
+	private RadioButton radio_tool=null;
 	private ImageView zoom_in=null;
 	private ImageView zoom_out=null;
-	private ImageView layers=null;
+	public ImageView layers=null;
 	private ImageView navi=null;
-	public LocationManager locManager;
 	
+	
+	public LocationManager locManager;
 	/**
 	 * 根据Gps获取当前的位置，在不断发生变化，全局供其他定位模块使用
 	 */
+//	public static PointLonLat gpsLonLat=new PointLonLat(116.306481,39.989197);
 	public static PointLonLat gpsLonLat;
-	
 	private MapOnClickListener mapOnClickListener;
 	private GpsLocationListener gpsLocationListener;
-	private ConvertCoordinate convertCoordinate;
+	public ConvertCoordinate convertCoordinate;
+	public AudioManager audioManager;
+	public TimerManager timerManager;
+	public RoadPlan roadPlan;
 	public FragmentManager fm;
 	private final static String picurl="http://162.105.30.246:8080/pkumap/map?level=1&x=7&y=7&type=2dmap";
 	private final static String picsrc="http://www.baidu.com";
+	
+	
+	
+	
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -89,6 +109,8 @@ public class MapActivity extends FragmentActivity {
         edit_search=(EditText) findViewById(R.id.poi_edit_search);
         radio_near=(RadioButton) findViewById(R.id.nearby);
         radio_pathplan=(RadioButton) findViewById(R.id.pathplan);
+        radio_navi=(RadioButton) findViewById(R.id.navigation);
+        radio_tool=(RadioButton) findViewById(R.id.tool);
         zoom_in=(ImageView) findViewById(R.id.zoom_in);
         zoom_out=(ImageView) findViewById(R.id.zoom_out);
         layers=(ImageView) findViewById(R.id.layers);
@@ -99,6 +121,8 @@ public class MapActivity extends FragmentActivity {
         edit_search.setOnClickListener(mapOnClickListener);
         radio_near.setOnClickListener(mapOnClickListener);
         radio_pathplan.setOnClickListener(mapOnClickListener);
+        radio_navi.setOnClickListener(mapOnClickListener);
+        radio_tool.setOnClickListener(mapOnClickListener);
         zoom_in.setOnClickListener(mapOnClickListener);
         zoom_out.setOnClickListener(mapOnClickListener);
         layers.setOnClickListener(mapOnClickListener);
@@ -106,8 +130,13 @@ public class MapActivity extends FragmentActivity {
         
         convertCoordinate=new ConvertCoordinate();
         
+     // 检查TTS数据是否已经安装并且可用(暂时先不检查吧)
+// 		Intent checkIntent = new Intent();
+// 		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+// 		startActivityForResult(checkIntent, REQ_TTS_STATUS_CHECK);
+        audioManager=AudioManager.getInstance(this);
      // 设置获取一次GPS的定位信息
-     	locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+     	locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0,
      			gpsLocationListener);
        
 		// 显示自定义的地图View
@@ -148,16 +177,27 @@ public class MapActivity extends FragmentActivity {
 				showPoiInMap(poi);
 			}
 			break;
-		case PathPlanActivity.RESULT_PATHPLAN:
+		case RESULT_PATHPATH:
 			Bundle pathBundle=data.getExtras();
 			ArrayList<RoadNode> roadNodes=pathBundle.getParcelableArrayList("path");
 			showPathInMap(roadNodes);
+			break;
+		case RESULT_NAVI:
+//			Toast.makeText(this, "导航开始", Toast.LENGTH_SHORT).show();
+			audioManager.mSpeech.speak("导航开始",TextToSpeech.QUEUE_ADD,null);
+			Bundle pathNaviBundle=data.getExtras();
+			ArrayList<RoadNode> naviNodes=pathNaviBundle.getParcelableArrayList("path");
+			showPathInMap(naviNodes);
+			timerManager.startTimer(naviNodes, roadPlan);
+			break;
+		case TextToSpeech.Engine.CHECK_VOICE_DATA_PASS:
+			 //初始化语音功能
+	        audioManager=AudioManager.getInstance(this);
 			break;
 		default:
 			break;
 		}
 	}
-	
 	@Override
 	public void onBackPressed() {
 		Fragment curFragment=fm.findFragmentByTag("PoiDetailFragment");
@@ -259,6 +299,7 @@ public class MapActivity extends FragmentActivity {
 		mapView.poiManager.close();
 		mapView.buildingManager.close();
 		mapView.pathPlanManager.close();
+		audioManager.close();
 	}
 	
 }
