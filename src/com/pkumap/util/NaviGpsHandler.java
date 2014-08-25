@@ -38,7 +38,9 @@ public class NaviGpsHandler extends Handler {
 			}else{
 				context.audioManager.mSpeech.speak("GPS当前不可用",TextToSpeech.QUEUE_FLUSH, null);
 			}*/
-			
+			break;
+		case 102:
+			context.mapView.invalidate();
 			break;
 			default:
 				break;
