@@ -10,8 +10,8 @@ public class PointLonLat implements Parcelable {
 	public PointLonLat(){}
 	
 	public PointLonLat(double x,double y){
-		this.x=x;
-		this.y=y;
+		this.x=x;  //经度--lng
+		this.y=y;  //维度--lat
 	}
 	
 	public double getX() {
@@ -25,6 +25,20 @@ public class PointLonLat implements Parcelable {
 	}
 	public void setY(double y) {
 		this.y = y;
+	}
+	/**
+	 * 判断当前点是否是否进入了某一个点的覆盖范围
+	 * @param lonLat
+	 * @return
+	 */
+	public boolean IsInAreaOfPoint(PointLonLat lonLat){
+		//暂时设置在一个0.0004*0.0004范围内搜索一个路口的PointId
+		double dx=0.0002;
+		double dy=0.0002;
+		if(x>(lonLat.getX()-dx)&&x<(lonLat.getX()+dx)&&y>(lonLat.getY()-dy)&&y<(lonLat.getX()+dy)){
+			return true;
+		}
+		return false;
 	}
 	/** 
      * 序列化实体类 
