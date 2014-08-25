@@ -108,4 +108,56 @@ public class NaviManager {
 		oriDis.append("行走大约"+(int)distance+"米");
 		return oriDis.toString();
 	}
+	/**
+	 * 获取目标点相对于基准点的方位和距离
+	 * @param srcLonLat
+	 * @param destLonLat
+	 * @param threeLonLat
+	 * @return
+	 */
+	public String GetOrientAndDistance(PointLonLat srcLonLat,PointLonLat destLonLat,PointLonLat threeLonLat){
+		StringBuffer oriDis=new StringBuffer();
+		double distance=GetDistance(srcLonLat, destLonLat);
+		String orient=GetOrientBaseOnBearing(GetBearing(srcLonLat, destLonLat));
+		oriDis.append("向"+orient+"方向");
+		oriDis.append("行走大约"+(int)distance+"米");
+		if(threeLonLat!=null){
+			String nextOrient=GetOrientBaseOnBearing(GetBearing(destLonLat, threeLonLat));
+			String newOrient=GetLeftOrRightByBearing(orient, nextOrient);
+			if("".equals(newOrient)){
+				newOrient=nextOrient;
+			}
+			oriDis.append("然后向"+newOrient+"转");
+		}else{
+			oriDis.append("到达终点");
+		}
+		return oriDis.toString();
+	}
+	/**
+	 * 根据当前的方位和下一个方位判断是左转还是右转
+	 * @param orient
+	 * @param nextOrient
+	 * @return
+	 */
+	public String GetLeftOrRightByBearing(String orient,String nextOrient){
+		String neworient="";
+		if("南".equals(orient)&&"东".equals(nextOrient)){
+			neworient="右";
+		}else if("南".equals(orient)&&"西".equals(nextOrient)){
+			neworient="左";
+		}else if("北".equals(orient)&&"东".equals(nextOrient)){
+			neworient="右";
+		}else if("北".equals(orient)&&"西".equals(nextOrient)){
+			neworient="左";
+		}else if("西".equals(orient)&&"南".equals(nextOrient)){
+			neworient="左";
+		}else if("西".equals(orient)&&"北".equals(nextOrient)){
+			neworient="右";
+		}else if("东".equals(orient)&&"北".equals(nextOrient)){
+			neworient="左";
+		}else if("东".equals(orient)&&"南".equals(nextOrient)){
+			neworient="右";
+		}
+		return neworient;
+	}
 }
