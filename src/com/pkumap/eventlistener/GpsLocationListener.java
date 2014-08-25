@@ -6,6 +6,7 @@ import com.pkumap.bean.PointLonLat;
 import com.pkumap.util.KalmanLatLong;
 
 import android.content.Context;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -30,6 +31,7 @@ public class GpsLocationListener implements LocationListener {
 		if(location!=null){
 			MapActivity.gpsLonLat=kalman.Process(location.getLatitude(), location.getLongitude(), 
 					location.getAccuracy(), location.getTime());
+//			mapActivity.edit_search.setText("当前Gps坐标为  X："+MapActivity.gpsLonLat.getX()+",Y："+MapActivity.gpsLonLat.getY());
 //			Toast.makeText(mapActivity,"当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY(), Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -37,7 +39,7 @@ public class GpsLocationListener implements LocationListener {
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-/*		switch(status){
+		switch(status){
 		case LocationProvider.AVAILABLE:
 			Toast.makeText(mapActivity, "当前GPS为可用状态",
 					Toast.LENGTH_SHORT).show();
@@ -50,8 +52,8 @@ public class GpsLocationListener implements LocationListener {
 			Toast.makeText(mapActivity, "当前GPS为暂停服务状态",
 					Toast.LENGTH_SHORT).show();
 			break;
-		}*/
-//		MapActivity.gpsLonLat=null;
+		}
+		MapActivity.gpsLonLat=null;
 //		Toast.makeText(mapActivity, "onStatusChanged",Toast.LENGTH_SHORT).show();
 	}
 
