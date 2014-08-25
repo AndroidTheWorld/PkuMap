@@ -5,8 +5,8 @@ import com.pkumap.activity.SearchActivity;
 import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
-import com.pkumap.util.BuildingManager;
-import com.pkumap.util.PoiManager;
+import com.pkumap.manager.BuildingManager;
+import com.pkumap.manager.PoiManager;
 import com.zdx.pkumap.R;
 
 import android.app.Activity;
