@@ -60,6 +60,8 @@ public class PathPlanService {
 			roadNode.setId(cursor.getInt(cursor.getColumnIndex("id")));
 			roadNode.setX(cursor.getFloat(cursor.getColumnIndex("x")));
 			roadNode.setY(cursor.getFloat(cursor.getColumnIndex("y")));
+			roadNode.setGps_x(cursor.getDouble(cursor.getColumnIndex("gps_x")));
+			roadNode.setGps_y(cursor.getDouble(cursor.getColumnIndex("gps_y")));
 			roadNode.setType(cursor.getString(cursor.getColumnIndex("type")));
 		}
 		cursor.close();
@@ -89,15 +91,16 @@ public class PathPlanService {
 	 * 根据Gps的位置获取PointId
 	 * @return
 	 */
-	public int getPointIdFromGps(PointLonLat pointLonLat,double dx,double dy){
+	public int getPointIdFromGps(PointLonLat pointLonLat,double dx,double dy,String map_type){
 		int pointId=-1;
 		
 		double gps_x=pointLonLat.getX();
 		double gps_y=pointLonLat.getY();
 		
 		String select_sql="select id from RoadNode where (gps_x between "+(gps_x-dx)+" and "+(gps_x+dx)+") and (gps_y between "
-		+(gps_y-dy)+" and "+(gps_y+dy)+")";
-		Cursor cursor=db.rawQuery(select_sql, null);
+		+(gps_y-dy)+" and "+(gps_y+dy)+") and type=?";
+		String[] args=new String[]{map_type};
+		Cursor cursor=db.rawQuery(select_sql, args);
 		//只取第一条数据之后再做考虑
 		if(cursor.moveToNext()){
 			pointId=cursor.getInt(cursor.getColumnIndex("id"));
