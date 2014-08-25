@@ -63,6 +63,8 @@ public class PathPlanOnClickListener implements OnClickListener {
 			startStr=path_start_edit.getHint().toString();
 		}
 		String endStr=path_end_edit.getText().toString();
+//		startStr="北京大学计算中心";
+//		endStr="北京大学百年纪念讲堂(颐和园店)";
 		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodes(startStr,endStr,event_Activity.map_type);
 		if(null==roadNodes){
 			Toast.makeText(event_Activity, "无法获取当前位置的路口点信息，请到距路近的位置重试",Toast.LENGTH_SHORT).show();
