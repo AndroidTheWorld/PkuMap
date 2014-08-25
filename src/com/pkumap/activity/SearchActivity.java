@@ -3,8 +3,8 @@ package com.pkumap.activity;
 import java.util.ArrayList;
 
 import com.pkumap.eventlistener.SearchPoiOnClickListener;
-import com.pkumap.util.BuildingManager;
-import com.pkumap.util.PoiManager;
+import com.pkumap.manager.BuildingManager;
+import com.pkumap.manager.PoiManager;
 import com.zdx.pkumap.R;
 
 import android.app.Activity;
@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 
 public class SearchActivity extends Activity {
 	private AutoCompleteTextView search_edit=null;
