@@ -40,6 +40,34 @@ public class PointLonLat implements Parcelable {
 		}
 		return false;
 	}
+	/**
+	 * 判断当前点是否在两个点之间
+	 * @param srcLonLat
+	 * @param destLonLat
+	 * @return
+	 */
+	public boolean isInAreaOfTwoRoadNode(RoadNode srcRoadNode,RoadNode destRoadNode){
+		double minX,maxX,minY,maxY;
+		if(srcRoadNode.getGps_x()>destRoadNode.getGps_x()){
+			minX=destRoadNode.getGps_x();
+			maxX=srcRoadNode.getGps_x();
+		}else{
+			minX=srcRoadNode.getGps_x();
+			maxX=destRoadNode.getGps_x();
+		}
+		if(srcRoadNode.getGps_y()>destRoadNode.getGps_y()){
+			minY=destRoadNode.getGps_y();
+			maxY=srcRoadNode.getGps_y();
+		}else{
+			minY=srcRoadNode.getGps_y();
+			maxY=destRoadNode.getGps_y();
+		}
+		double dx=0.0002,dy=0.0002;//扩展大概3米
+		if(x>(minX-dx)&&x<(maxX+dx)&&y>(minY-dy)&&y<(maxY+dy)){
+			return true;
+		}
+		return false;
+	}
 	/** 
      * 序列化实体类 
      */  
