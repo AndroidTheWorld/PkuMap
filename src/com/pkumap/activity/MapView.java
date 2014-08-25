@@ -9,11 +9,11 @@ import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.RoadNode;
-import com.pkumap.util.BuildingManager;
+import com.pkumap.manager.BuildingManager;
+import com.pkumap.manager.PathPlanManager;
+import com.pkumap.manager.PoiManager;
 import com.pkumap.util.ConvertCoordinate;
 import com.pkumap.util.ImageLoader;
-import com.pkumap.util.PathPlanManager;
-import com.pkumap.util.PoiManager;
 import com.zdx.pkumap.R;
 
 import android.R.integer;
@@ -228,6 +228,10 @@ public class MapView extends View {
 	 * 手指抬起的时间
 	 */
 	private long uptime;
+	/**
+	 * 当前在地图上的位置
+	 */
+	public Point curLocation;
 	public MapView(Context context,AttributeSet set) {
 		super(context,set);
 		this.context=context;
@@ -352,6 +356,9 @@ public class MapView extends View {
 		if(roadPoints.size()>0){
 			DrawPathInMap(roadPoints);
 		}
+		if(curLocation!=null){
+			DrawCurLocationInMap(curLocation);
+		}
 	}
 	/**
 	 * 地图缩放bySummer
@@ -456,6 +463,9 @@ public class MapView extends View {
 		}
 		if(roadPoints.size()>0){
 			DrawPathInMap(roadPoints);
+		}
+		if(curLocation!=null){
+			DrawCurLocationInMap(curLocation);
 		}
 	}
 	/**
@@ -563,6 +573,9 @@ public class MapView extends View {
 		}
 		if(roadPoints.size()>0){
 			DrawPathInMap(roadPoints);
+		}
+		if(curLocation!=null){
+			DrawCurLocationInMap(curLocation);
 		}
 	}
 	public int a=0;
@@ -855,6 +868,15 @@ public class MapView extends View {
 			
 		}
 		canvas.drawPath(path, paint);
+	}
+	/**
+	 * 在当前地图上绘制出当前Gps获取到的位置
+	 * @param curLocPoint
+	 */
+	private void DrawCurLocationInMap(Point curLocPoint){
+		Point screenPoint=convertCoordinate.getScreenPointFromLonLat(curLocPoint, this);
+		Bitmap marker=BitmapFactory.decodeResource(getResources(), R.drawable.cur_loc);
+		canvas.drawBitmap(marker, screenPoint.getX()-8,screenPoint.getY()-27, null);
 	}
 	/**
 	 * 在三维地图上获取当前位置是否在Building范围内
