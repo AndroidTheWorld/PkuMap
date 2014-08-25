@@ -1,14 +1,20 @@
 package com.pkumap.util;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
 
+import com.pkumap.activity.MapActivity;
 import com.pkumap.activity.MapView;
+import com.pkumap.bean.Point;
 import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.Road;
 import com.pkumap.bean.RoadNode;
+import com.pkumap.manager.BuildingManager;
+import com.pkumap.manager.PathPlanManager;
+import com.pkumap.manager.PoiManager;
 
 public class RoadPlan {
 	/**
@@ -78,17 +84,30 @@ public class RoadPlan {
 	 */
 	public ArrayList<RoadNode> getRoadNodes(String start,String end,String map_type){
 		
-		Log.i("ZDX", "zzz");
+		ArrayList<RoadNode> roadNodes;
 		int startId,endId;
+		
 		if("3dmap".equals(map_type)){
-			startId=buildingManager.getPointIdByName(start);
+			if("我的位置".equals(start)){
+				startId=pathPlanManager.getPointIdFromCurGps(MapActivity.gpsLonLat, map_type);
+			}else{
+				startId=buildingManager.getPointIdByName(start);
+			}
 			endId=buildingManager.getPointIdByName(end);
 		}else{
-			startId=poiManager.getPointIdByName(start);
+			if("我的位置".equals(start)){
+				startId=pathPlanManager.getPointIdFromCurGps(MapActivity.gpsLonLat, map_type);
+			}else{
+				startId=poiManager.getPointIdByName(start);
+			}
 			endId=poiManager.getPointIdByName(end);
+			
 		}
-		
-		ArrayList<RoadNode> roadNodes=getRoadNodeInPath(startId, endId, map_type);
+		if(startId==-1){
+			roadNodes=null;
+			return roadNodes;
+		}
+		roadNodes=getRoadNodeInPath(startId, endId, map_type);
 		return roadNodes;
 	}
 	/**
@@ -97,7 +116,16 @@ public class RoadPlan {
 	 * @return
 	 */
 	public int getPointIdFromCurGps(PointLonLat gpsLonLat){
-		return pathPlanManager.getPointIdFromCurGps(gpsLonLat);
+		return pathPlanManager.getPointIdFromCurGps(gpsLonLat,mapView.map_type);
+	}
+	/**
+	 * 根据当前的GPS获取附近的路口点
+	 * @param curGpsLonLat
+	 * @return
+	 */
+	public RoadNode getNearRoadNodeFromCurGps(PointLonLat curGpsLonLat){
+		int pointId=getPointIdFromCurGps(curGpsLonLat);
+		return pathPlanManager.getRoadNodeById(pointId, mapView.map_type);
 	}
 	/**
 	 * 根据起点和终点的ID获取对应的路径上的点
