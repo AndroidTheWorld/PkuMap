@@ -61,8 +61,10 @@ public class MapActivity extends FragmentActivity {
 	/**
 	 * 根据Gps获取当前的位置，在不断发生变化，全局供其他定位模块使用
 	 */
-//	public static PointLonLat gpsLonLat=new PointLonLat(116.306481,39.989197);
-	public static PointLonLat gpsLonLat;
+//	public static PointLonLat gpsLonLat=new PointLonLat(116.306340,39.989003);
+//	public static PointLonLat gpsLonLat=new PointLonLat(116.305243,39.988932);
+	public static PointLonLat gpsLonLat=new PointLonLat( 116.305538,39.992547);
+	
 	private MapOnClickListener mapOnClickListener;
 	private GpsLocationListener gpsLocationListener;
 	public ConvertCoordinate convertCoordinate;
