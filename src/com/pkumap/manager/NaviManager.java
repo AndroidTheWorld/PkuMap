@@ -123,11 +123,16 @@ public class NaviManager {
 		oriDis.append("行走大约"+(int)distance+"米");
 		if(threeLonLat!=null){
 			String nextOrient=GetOrientBaseOnBearing(GetBearing(destLonLat, threeLonLat));
-			String newOrient=GetLeftOrRightByBearing(orient, nextOrient);
-			if("".equals(newOrient)){
-				newOrient=nextOrient;
+			if(orient.equals(nextOrient)){
+				oriDis.append("然后直走");
+			}else{
+				String newOrient=GetLeftOrRightByBearing(orient, nextOrient);
+				if("".equals(newOrient)){
+					newOrient=nextOrient;
+				}
+				oriDis.append("然后向"+newOrient+"转");
 			}
-			oriDis.append("然后向"+newOrient+"转");
+			
 		}else{
 			oriDis.append("到达终点");
 		}
