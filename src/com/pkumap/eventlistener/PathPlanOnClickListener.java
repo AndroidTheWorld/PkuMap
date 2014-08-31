@@ -10,6 +10,7 @@ import com.pkumap.bean.Point;
 import com.pkumap.bean.Road;
 import com.pkumap.bean.RoadNode;
 import com.pkumap.manager.PathPlanManager;
+import com.pkumap.manager.PoiManager;
 import com.pkumap.util.Dijkstra;
 import com.pkumap.util.RoadPlan;
 import com.zdx.pkumap.R;
@@ -66,7 +67,7 @@ public class PathPlanOnClickListener implements OnClickListener {
 //		startStr="北京大学计算中心";
 //		endStr="北京大学百年纪念讲堂(颐和园店)";
 		ArrayList<RoadNode> roadNodes=roadPlan.getRoadNodes(startStr,endStr,event_Activity.map_type);
-		if(null==roadNodes){
+		if(roadNodes==null){
 			Toast.makeText(event_Activity, "无法获取当前位置的路口点信息，请到距路近的位置重试",Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -85,19 +86,20 @@ public class PathPlanOnClickListener implements OnClickListener {
 	
 	private void importPoiData(){
 		//POI数据操作
-//		PoiManager poiManager=new PoiManager(event_Activity.getApplicationContext());
+		PoiManager poiManager=new PoiManager(event_Activity.getApplicationContext());
 //		poiManager.importPoiFromMongo();
 //		poiManager.updatePoiTable();
 //		poiManager.updatePoiAddGps();
 //		poiManager.ConvertToGpsAndUpdateGpsInPoi();
 //		Poi poi=poiManager.getPoiById(255);
 //		poiManager.updatePoiAddPointID();
+		poiManager.updatePoiAddInstitution();
 		//路径规划数据操作
-		PathPlanManager pathPlanManager=new PathPlanManager(event_Activity.getApplicationContext());
+//		PathPlanManager pathPlanManager=new PathPlanManager(event_Activity.getApplicationContext());
 //		pathPlanManager.importRoadInfo();
 //		pathPlanManager.importRoadNodeInfo();
 //		pathPlanManager.updateRoadNodeTableAddGps();
-		pathPlanManager.ConvertGpsFromLocalAndUpdateRoadNode();
+//		pathPlanManager.ConvertGpsFromLocalAndUpdateRoadNode();
 
 		//Building数据操作
 //		BuildingManager buildingManager=new BuildingManager(event_Activity.getApplicationContext());
