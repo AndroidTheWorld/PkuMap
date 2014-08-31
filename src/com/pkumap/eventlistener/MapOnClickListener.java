@@ -10,15 +10,20 @@ import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.PointLonLat;
 import com.pkumap.bean.RoadNode;
+import com.pkumap.handler.NaviGpsHandler;
 import com.pkumap.manager.NaviManager;
 import com.pkumap.manager.TimerManager;
-import com.pkumap.util.NaviGpsHandler;
 import com.pkumap.util.RoadPlan;
 import com.zdx.pkumap.R;
 
 
 
 
+
+
+
+
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.speech.tts.TextToSpeech;
@@ -26,6 +31,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -38,9 +45,6 @@ public class MapOnClickListener implements OnClickListener {
 	private EditText poi_edit_txt;
 	private ImageView layers_img_view;
 	private MapView mapView;
-	private View layerView;
-	private RadioButton radio_layer_three=null;
-	private RadioButton radio_layer_two=null;
 	private PopupWindow layers_window;
 	private NaviGpsHandler naviGpsHandler;
 	private NaviManager naviManager;
@@ -49,13 +53,8 @@ public class MapOnClickListener implements OnClickListener {
 		poi_edit_txt=target_Activity.edit_search;
 		layers_img_view=target_Activity.layers;
 		mapView=target_Activity.mapView;
+		layers_window=target_Activity.layers_window;
 	
-		layerView=LayoutInflater.from(event_Activity).inflate(R.layout.layer_main,null);
-		radio_layer_three=(RadioButton)layerView.findViewById(R.id.three_layer);
-	    radio_layer_two=(RadioButton) layerView.findViewById(R.id.two_layer);
-	    radio_layer_three.setOnClickListener(this);
-        radio_layer_two.setOnClickListener(this);
-        
         event_Activity.roadPlan=new RoadPlan(mapView);
         
         naviGpsHandler=new NaviGpsHandler(event_Activity);
@@ -221,6 +220,7 @@ public class MapOnClickListener implements OnClickListener {
 		ArrayList<RoadNode> roadNodes=event_Activity.roadPlan.getRoadNodeInPath(curPointId, poi.getPointId(), mapView.map_type);
 //		Toast.makeText(event_Activity,roadNodes.size(), Toast.LENGTH_SHORT).show();
 		event_Activity.showPathInMap(roadNodes);
+		event_Activity.startNaviFromCurLocation(roadNodes);
 	}
 	/**
 	 * 切换地图
@@ -241,27 +241,20 @@ public class MapOnClickListener implements OnClickListener {
 		mapView.currentStatus=mapView.STATUS_INIT;
 		mapView.invalidate();
 		layers_window.dismiss();
-	}
-	/**
-	 * 初始化PopUpWindow
-	 */
-	private void initPopUpWindow(){
-		layers_window=new PopupWindow(layerView, 135,80);
-		layers_window.setFocusable(true);  
-		layers_window.setOutsideTouchable(true);
-//		layers_window.setAnimationStyle(anim.slide_in_left);
-		Drawable pop_drawable=event_Activity.getResources().getDrawable(R.drawable.pop_border);
-        layers_window.setBackgroundDrawable(pop_drawable);
+		event_Activity.flag=0;
+		event_Activity.windowDimOut();
 	}
 	/**
 	 * 显示不同的地图图层的选择框PopWindow
 	 */
 	private void changeLayers(){
-		initPopUpWindow();
+		event_Activity.flag=1;
+		event_Activity.windowDimOut();
 		int[] location = new int[2];  
 		layers_img_view.getLocationOnScreen(location); 
 		layers_window.showAtLocation(layers_img_view, Gravity.NO_GRAVITY, location[0]-layers_window.getWidth(), location[1]-10); 
 	}
+	
 	/**
 	 * 点击mapView显示或者隐藏POI
 	 */
@@ -273,9 +266,6 @@ public class MapOnClickListener implements OnClickListener {
 	 * @param id
 	 */
 	private void zoomMap(int id){
-		
-		ImageView zoom_in=(ImageView) event_Activity.findViewById(R.id.zoom_in);
-		ImageView zoom_out=(ImageView) event_Activity.findViewById(R.id.zoom_out);
 		if(id==R.id.zoom_in){
 			Toast.makeText(event_Activity, "ZoomIn", Toast.LENGTH_SHORT).show();
 			if(mapView.level<3){
