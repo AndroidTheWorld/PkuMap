@@ -101,6 +101,12 @@ public class PoiManager {
 		poiService.updatePoiAddGps();
 	}
 	/**
+	 * 更新表结构，添加机构字段
+	 */
+	public void updatePoiAddInstitution(){
+		
+	}
+	/**
 	 * 更新poi数据，添加pointid字段
 	 */
 	public void updatePoiAddPointID(){
