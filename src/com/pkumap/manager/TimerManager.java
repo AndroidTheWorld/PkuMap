@@ -5,7 +5,7 @@ import java.util.Timer;
 
 import com.pkumap.activity.MapActivity;
 import com.pkumap.bean.RoadNode;
-import com.pkumap.util.NaviTimerMask;
+import com.pkumap.task.NaviTimerMask;
 import com.pkumap.util.RoadPlan;
 
 import android.content.Context;
