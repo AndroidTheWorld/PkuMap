@@ -20,20 +20,34 @@ import com.zdx.pkumap.R;
 
 
 
+
+
+
+
+
+
+
+import android.R.integer;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -51,11 +65,16 @@ public class MapActivity extends FragmentActivity {
 	private RadioButton radio_pathplan=null;
 	private RadioButton radio_navi=null;
 	private RadioButton radio_tool=null;
+	private RadioButton radio_layer_three=null;
+	private RadioButton radio_layer_two=null;
 	private ImageView zoom_in=null;
 	private ImageView zoom_out=null;
 	public ImageView layers=null;
 	private ImageView navi=null;
-	
+	//屏幕弹出框
+	public PopupWindow layers_window;
+	//屏幕的透明度
+	public int flag=0;
 	
 	public LocationManager locManager;
 	/**
@@ -74,10 +93,6 @@ public class MapActivity extends FragmentActivity {
 	public FragmentManager fm;
 	private final static String picurl="http://162.105.30.246:8080/pkumap/map?level=1&x=7&y=7&type=2dmap";
 	private final static String picsrc="http://www.baidu.com";
-	
-	
-	
-	
 	
 	
 	@Override
@@ -118,6 +133,7 @@ public class MapActivity extends FragmentActivity {
         layers=(ImageView) findViewById(R.id.layers);
         navi=(ImageView) findViewById(R.id.naviImg);
        
+        initPoPupWindow();
         mapOnClickListener=new MapOnClickListener(this);
         gpsLocationListener=new GpsLocationListener(this);
         edit_search.setOnClickListener(mapOnClickListener);
@@ -129,6 +145,11 @@ public class MapActivity extends FragmentActivity {
         zoom_out.setOnClickListener(mapOnClickListener);
         layers.setOnClickListener(mapOnClickListener);
         navi.setOnClickListener(mapOnClickListener);
+//      mapView.setOnClickListener(mapOnClickListener);
+        radio_layer_three.setOnClickListener(mapOnClickListener);
+        radio_layer_two.setOnClickListener(mapOnClickListener);
+      
+        
         
         convertCoordinate=new ConvertCoordinate();
         
@@ -146,7 +167,22 @@ public class MapActivity extends FragmentActivity {
 //		setContentView(mapView);
 		
 	}
-	
+	/**
+	 * 初始化PopUpWindow
+	 */
+	private void initPoPupWindow(){
+		View layerView=LayoutInflater.from(this).inflate(R.layout.layer_main,null);
+        layers_window=new PopupWindow(layerView, 135,80);
+//		layers_window.setFocusable(true);
+		//点击PopUpWindow区域外的部分，PopUpWindow消失
+//		layers_window.setOutsideTouchable(false);
+//		layers_window.setAnimationStyle(anim.slide_in_left);
+        Drawable pop_drawable=this.getResources().getDrawable(R.drawable.pop_border);
+        layers_window.setBackgroundDrawable(pop_drawable);
+       
+        radio_layer_three=(RadioButton)layerView.findViewById(R.id.three_layer);
+	    radio_layer_two=(RadioButton) layerView.findViewById(R.id.two_layer);
+	}
 	
 	@Override
 	protected void onPause() {
@@ -154,7 +190,6 @@ public class MapActivity extends FragmentActivity {
 		super.onPause();
 		
 	}
-
 
 	@Override
 	protected void onResume() {
@@ -185,12 +220,10 @@ public class MapActivity extends FragmentActivity {
 			showPathInMap(roadNodes);
 			break;
 		case RESULT_NAVI:
-//			Toast.makeText(this, "导航开始", Toast.LENGTH_SHORT).show();
-			audioManager.mSpeech.speak("导航开始",TextToSpeech.QUEUE_ADD,null);
 			Bundle pathNaviBundle=data.getExtras();
 			ArrayList<RoadNode> naviNodes=pathNaviBundle.getParcelableArrayList("path");
 			showPathInMap(naviNodes);
-			timerManager.startTimer(naviNodes, roadPlan);
+			startNaviFromCurLocation(naviNodes);
 			break;
 		case TextToSpeech.Engine.CHECK_VOICE_DATA_PASS:
 			 //初始化语音功能
@@ -199,6 +232,28 @@ public class MapActivity extends FragmentActivity {
 		default:
 			break;
 		}
+	}
+	/**
+	 * 开始导航
+	 * @param naviNodes
+	 */
+	public void startNaviFromCurLocation(ArrayList<RoadNode> naviNodes){
+		audioManager.mSpeech.speak("导航开始",TextToSpeech.QUEUE_ADD,null);
+		timerManager.startTimer(naviNodes, roadPlan);
+	}
+	
+	/**
+	 * 调整背景的透明度
+	 * @param flag
+	 */
+	public void windowDimOut(){
+		WindowManager.LayoutParams layoutParams=this.getWindow().getAttributes();
+		if(flag==1){
+			layoutParams.alpha=0.5f;
+		}else if(flag==0){
+			layoutParams.alpha=1f;
+		}
+		this.getWindow().setAttributes(layoutParams);
 	}
 	@Override
 	public void onBackPressed() {
@@ -302,6 +357,7 @@ public class MapActivity extends FragmentActivity {
 		mapView.buildingManager.close();
 		mapView.pathPlanManager.close();
 		audioManager.close();
+		locManager.removeUpdates(gpsLocationListener);
 	}
 	
 }
