@@ -9,9 +9,13 @@ import com.pkumap.bean.Building;
 import com.pkumap.bean.Poi;
 import com.pkumap.bean.Point;
 import com.pkumap.bean.RoadNode;
+import com.pkumap.handler.BitmapHandler;
+import com.pkumap.handler.InertiaHandler;
 import com.pkumap.manager.BuildingManager;
+import com.pkumap.manager.InertiaTimerManager;
 import com.pkumap.manager.PathPlanManager;
 import com.pkumap.manager.PoiManager;
+import com.pkumap.task.BitMapAsyncTask;
 import com.pkumap.util.ConvertCoordinate;
 import com.pkumap.util.ImageLoader;
 import com.zdx.pkumap.R;
@@ -32,6 +36,8 @@ import android.graphics.Rect;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
+import android.os.Message;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -66,8 +72,8 @@ public class MapView extends View {
 	/**
 	 * 画布上起始绘的位置
 	 */
-	private float startX=0;
-	private float startY=0;
+	public float startX=0;
+	public float startY=0;
 	private ImageLoader imageLoader;
 	/**
 	 * 手机屏幕中心点到整个地图的左端的距离---mapDX
@@ -101,7 +107,7 @@ public class MapView extends View {
 	/**
 	 * 图片要绘制的区域和绘制的位置（一般要绘区域为整个瓦片）
 	 */
-	private Rect srcRect;
+	private RectF srcRect;
 	private RectF dstRect;
 	/**
 	 * 放缩的次数（临时加）
@@ -119,7 +125,7 @@ public class MapView extends View {
 	/**
 	 * 画布上要绘制的块的索引范围
 	 */
-	private int left=0,top=0,right=0,bottom=0;
+	public int left=0,top=0,right=0,bottom=0;
 	/**
 	 * 单指在屏幕滑动时，x方向和y方向上的偏移量
 	 */
@@ -190,7 +196,7 @@ public class MapView extends View {
 	/**
 	 * 一个全局的Canvas
 	 */
-	private Canvas canvas;
+	public Canvas canvas;
 	/**
 	 * 当前在地图上有标注的Poi
 	 */
@@ -232,6 +238,22 @@ public class MapView extends View {
 	 * 当前在地图上的位置
 	 */
 	public Point curLocation;
+	/**
+	 * 最后一次Move的过程
+	 */
+	private long preMoveTime;
+	/**
+	 * 最后一次Move的位置
+	 */
+	private float preMoveX;
+	private float preMoveY;
+	//为惯性起的线程
+	private InertiaHandler inertiaHandler;
+	//为惯性设置的定时器类
+	private InertiaTimerManager inertiaTimerManager;
+	//为绘制指定位置瓦片起的线程
+	private BitmapHandler bitmapHandler;
+	private BitMapAsyncTask bitMapAsyncTask;
 	public MapView(Context context,AttributeSet set) {
 		super(context,set);
 		this.context=context;
@@ -248,7 +270,7 @@ public class MapView extends View {
 	    bottom=top+y_num;*/
 	    BitmapWidth=PIC_WIDTH;
 	    BitmapHeight=PIC_HEIGHT;
-	    srcRect=new Rect();
+	    srcRect=new RectF();
 	    dstRect=new RectF();
 	    currentStatus = STATUS_INIT;
 	    isStartZoom=false;
@@ -256,6 +278,10 @@ public class MapView extends View {
 	    buildingManager=new BuildingManager(context);
 	    pathPlanManager=new PathPlanManager(context);
 	    mapActivity=(MapActivity) context;
+	    inertiaHandler=new InertiaHandler(this);
+	    inertiaTimerManager=new InertiaTimerManager(inertiaHandler);
+	    bitmapHandler=new BitmapHandler(this);
+	 
 	    if(null!=mapActivity.fm){
 	    	fmView=mapActivity.fm;
 	    }else{
@@ -578,9 +604,14 @@ public class MapView extends View {
 			DrawCurLocationInMap(curLocation);
 		}
 	}
-	public int a=0;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		//改变View透明度
+		if(mapActivity.flag==1){
+			mapActivity.flag=0;
+			mapActivity.windowDimOut();
+			mapActivity.layers_window.dismiss();
+		}
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_POINTER_DOWN:
 			 Log.i(TAG,"ACTION_POINTER_DOWN");
@@ -598,6 +629,36 @@ public class MapView extends View {
        	
 			 Log.i("preXY","preX="+preX+",preY="+preY);
             break;
+		 case MotionEvent.ACTION_MOVE:
+	       	 Log.i(TAG,"ACTION_MOVE");
+	       	 preMoveTime=System.currentTimeMillis();
+	       	 if(event.getPointerCount()==1){
+	       		 curX=event.getX();
+	        	 curY=event.getY();
+	        	 preMoveX=preX;
+	        	 preMoveY=preY;
+	        	
+	          	 Log.i("curXY", "curX:"+curX+",curY:"+curY);
+	         	 moveDX=curX-preX;
+	         	 moveDY=curY-preY;
+	         	 Log.i("dXYMove","moveDX:"+moveDX+",moveDY:"+moveDY);
+	         	 currentStatus = STATUS_MOVE;
+	         	 preX=curX;
+	         	 preY=curY;
+	         	 invalidate();
+	       	 }else if(event.getPointerCount()==2){
+	       		 // 有两个手指按在屏幕上移动时，为缩放状态
+			//		centerPointBetweenFingers(event);
+					curFingerDis = distanceBetweenFingers(event);
+					singleScaleLevel=(float) (curFingerDis/lastFingerDis);
+					Log.i("SingleScaleLevel","singleScale:"+singleScaleLevel);
+					scaleLevel=scaleLevel*singleScaleLevel;
+					currentStatus=STATUS_ZOOM;
+					Log.i("ScaledLevel", "scalelevel:"+scaleLevel);
+					lastFingerDis=curFingerDis;
+					invalidate();
+	       	 } 
+	         break;
         case MotionEvent.ACTION_UP:
         	uptime=System.currentTimeMillis();
         	Log.i("DTime", "uptime-downtime:"+(uptime-downtime));
@@ -618,89 +679,28 @@ public class MapView extends View {
         	       		 }
         	       	 }
         		
-        	}else {
-        		
-           	 	float speedX=(curX-downX)/(uptime-downtime);
-           	 	float speedY=(curY-downY)/(uptime-downtime);
-           	 	float dxy=Math.abs(speedY/speedX);
-           	 	if(Math.abs(speedX)>0.5||Math.abs(speedY)>0.5){
-           	 	Log.i("SpeedXY", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
-           	 		while(Math.abs(speedX)>0.0001||Math.abs(speedY)>0.0001){
-           	 		
-           	 			speedX*=0.95;
-	           	 		speedY*=0.95;
-	           	 		
-		           	 	moveDX=speedX*200;
-	           	 		moveDY=speedY*200;
-	           	 		currentStatus = STATUS_MOVE;
-	           	 		invalidate();
-	           	 		
-           	 		}
-           	 		Log.i("zhangdx", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
-           	 	}
-          /* 	 	while(Math.abs(speedX)>0.5||Math.abs(speedY)>0.5){
-           	 		Log.i("SpeedXY", "SpeedX:"+speedX+",SpeedY:"+speedY+",curX-downX:"+(curX-downX)+",curY-downY:"+(curY-downY));
-           	 		if(Math.abs(speedX)>0.1&&speedX<0){
-           	 			speedX+=0.02;
-           	 		}else if(Math.abs(speedX)>0.1&&speedX>0){
-           	 			speedX-=0.02;
-           	 		}
-           	 		
-           	 		if(Math.abs(speedY)>0.1&&speedY<0){
-           	 			speedY+=0.02*dxy;
-           	 		}else if(Math.abs(speedY)>0.1&&speedY>0){
-           	 			speedY-=0.02*dxy;
-           	 		}
-           	 		moveDX=speedX*200;
-           	 		moveDY=speedY*200;
-           	 		currentStatus = STATUS_MOVE;
-           	 		invalidate();
-           	 	}*/
-			}
-       	 	Log.i(TAG,"ACTION_UP");
+        	}
+    		Log.i("dTime", "dTime:"+(uptime-preMoveTime));
+    		float speedX=0f;
+    		float speedY=0f;
+    		if((uptime-preMoveTime)!=0f){
+    			speedX=(curX-preMoveX)/(uptime-preMoveTime);
+           	 	speedY=(curY-preMoveY)/(uptime-preMoveTime);
+           	 	speedX=Math.abs(speedX)>5f?(speedX>0?5f:-5f):speedX;
+           	 	speedY=Math.abs(speedY)>5f?(speedY>0?5f:-5f):speedY;
+           	 	inertiaTimerManager.startTimer(speedX, speedY);
+    		}
+       	 	Log.i("ACTION_UP","speedX:"+speedX+",speedY:"+speedY);
        	 	
+       	 	Log.i(TAG,"ACTION_UP");
+        	
        	 	break;
            
         case MotionEvent.ACTION_POINTER_UP:
        	 Log.i(TAG,"ACTION_POINTER_UP");
        	 	//lastFingerDis=-1;
             break;
-        case MotionEvent.ACTION_MOVE:
-       	 Log.i(TAG,"ACTION_MOVE");
-       	 if(event.getPointerCount()==1){
-       		 
-       		 curX=event.getX();
-        	 curY=event.getY();
-          	 Log.i("curXY", "curX:"+curX+",curY:"+curY);
-         	 moveDX=curX-preX;
-         	 moveDY=curY-preY;
-         	 Log.i("dXY","dx:"+moveDX+",dy:"+moveDY);
-         	 currentStatus = STATUS_MOVE;
-         	 preX=curX;
-         	 preY=curY;
-         	 invalidate();
-       	 }else if(event.getPointerCount()==2){
-       		 // 有两个手指按在屏幕上移动时，为缩放状态
-		//		centerPointBetweenFingers(event);
-				curFingerDis = distanceBetweenFingers(event);
-				singleScaleLevel=(float) (curFingerDis/lastFingerDis);
-				Log.i("SingleScaleLevel","singleScale:"+singleScaleLevel);
-				scaleLevel=scaleLevel*singleScaleLevel;
-				currentStatus=STATUS_ZOOM;
-	/*			if (curFingerDis > lastFingerDis) {
-	//			scaleLevel=1.05f;
-				scaleNum*=scaleLevel;
-				++flag;			
-				} else {
-	//			scaleLevel=0.95f;
-				scaleNum*=scaleLevel;
-				--flag;
-				}*/
-				Log.i("ScaledLevel", "scalelevel:"+scaleLevel);
-				lastFingerDis=curFingerDis;
-				invalidate();
-       	 } 
-         break;
+       
         }
 		return true;
 	}
@@ -711,6 +711,7 @@ public class MapView extends View {
 		 poi=null;
 		 building=null;
 		 roadPoints.clear();
+		 mapActivity.timerManager.stopTimer();
    		 this.currentStatus=STATUS_INIT;
    		 invalidate();
    		 
@@ -990,9 +991,9 @@ public class MapView extends View {
 				if(bitmap!=null){
 					makeDstRect(x,y);
 					canvas.drawBitmap(bitmap, null, dstRect, null);
-					paint.setColor(Color.RED);
+		/*			paint.setColor(Color.RED);
 					paint.setStyle(Style.STROKE);
-					canvas.drawRect(dstRect, paint);
+					canvas.drawRect(dstRect, paint);*/
 				}
 			}		
 		}
@@ -1005,25 +1006,30 @@ public class MapView extends View {
 				Bitmap bitmap=null;
 				String url="http://192.168.0.5:8083/pkumap/map?level="+level+"&x="+x+"&y="+y+"&type=2dmap";
 				Log.i("URL",url);
+				Integer[] params=new Integer[]{level,x,y};
+//				bitMapAsyncTask=new BitMapAsyncTask(this, bitmapHandler);
+//				bitMapAsyncTask.execute(params);
 				bitmap=readBitmapFromAsset(level,x,y);
 				if(bitmap==null)bitmap=readBitmapFromAsset();
 				Log.i("startXY","startX:"+startX+",startY:"+startY+"x:"+x+",y:"+y);
 				if(bitmap!=null){
 					makeDstRect(x,y);
 					canvas.drawBitmap(bitmap, null, dstRect, null);
-					paint.setColor(Color.RED);
+			/*		paint.setColor(Color.RED);
 					paint.setStyle(Style.STROKE);
-					canvas.drawRect(dstRect, paint);
+					canvas.drawRect(dstRect, paint);*/
 				}
 			}		
 		}
 	}
 	/**
-	 * 在位图的周围画线
-	 * @param Rect
+	 * 绘制单独一个Tile块
+	 * @param block_x
+	 * @param block_y
 	 */
-	public void drawBitmapBound(Rect dstRect){
-		
+	public void drawTile(int block_x,int block_y,Bitmap bitmap){
+		makeDstRect(block_x, block_y);
+		canvas.drawBitmap(bitmap, null, dstRect, null);
 	}
 	/**
 	 * 要绘制的图片的区域
@@ -1107,7 +1113,6 @@ public class MapView extends View {
 			}else{
 				inputStream=getResources().getAssets().open(bitmapUrl);
 				if(inputStream!=null){
-					bitmap=BitmapFactory.decodeStream(inputStream);	
 					bitmap=BitmapFactory.decodeStream(inputStream);	
 					imageLoader.addBitmapToMemoryCache(bitmapUrl, bitmap);
 				}
