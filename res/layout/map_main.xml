@@ -20,6 +20,7 @@
 	      android:id="@+id/poi_edit_search"
 	      android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
+	      android:drawableLeft="@drawable/search"
 	      android:background="@android:drawable/edit_text"
 	      android:padding="5dp"
 	      android:singleLine="true" 
@@ -59,8 +60,7 @@
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:src="@drawable/layers"
-           android:background="@drawable/bg_border"
-           android:padding="3dp"/>   
+           android:background="@drawable/bg_border"/>   
    </LinearLayout>
    
     <LinearLayout
@@ -81,7 +81,8 @@
                     <RadioButton
                         android:id="@+id/nearby"
                         style="@style/footbar"
-                        android:drawableLeft="@drawable/ic_launcher"
+                        android:drawableLeft="@drawable/near"
+                        android:paddingLeft="25dp"
                         android:paddingTop="8dp"
                         android:text="附近" />
                 </LinearLayout>
@@ -93,7 +94,7 @@
                     <RadioButton
                         android:id="@+id/pathplan"
                         style="@style/footbar"
-                        android:drawableLeft="@drawable/ic_launcher"
+                        android:drawableLeft="@drawable/path"
                         android:paddingTop="8dp"
                         android:text="路线" />
                 </LinearLayout>
@@ -106,7 +107,7 @@
                     <RadioButton
                         android:id="@+id/navigation"
                         style="@style/footbar"
-                        android:drawableLeft="@drawable/ic_launcher"
+                        android:drawableLeft="@drawable/navigation"
                         android:paddingTop="8dp"
                         android:text="导航" />
                 </LinearLayout>
@@ -119,8 +120,9 @@
                     <RadioButton
                         android:id="@+id/tool"
                         style="@style/footbar"
-                        android:drawableLeft="@drawable/ic_launcher"
+                        android:drawableLeft="@drawable/tool"
                         android:paddingTop="8dp"
+                        android:paddingRight="0dp"
                         android:text="工具" />
                 </LinearLayout>
    </LinearLayout>
