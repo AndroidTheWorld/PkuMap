@@ -42,20 +42,6 @@
         	android:focusable="true"
         	android:focusableInTouchMode="true"
             android:orientation="vertical">
- <!--             <EditText 
-                android:id="@+id/path_start"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:background="@android:drawable/edit_text"
-                android:hint="我的位置"/>
-             <EditText 
-                android:id="@+id/path_end"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:background="@android:drawable/edit_text"
-                android:hint="输入终点"/>-->
              <AutoCompleteTextView 
 		        android:id="@+id/path_start"
 		        android:layout_width="fill_parent"
