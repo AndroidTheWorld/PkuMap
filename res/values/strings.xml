@@ -1,6 +1,5 @@
 <resources>
-
-    <string name="app_name">PkuMap</string>
+    <string name="app_name">校园地图</string>
 	<string name="pathplan_name">路径规划</string>
 	<string name="poisearch_name">搜索</string>
 	<string name="path_name">路径规划</string>
