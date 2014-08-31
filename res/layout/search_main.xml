@@ -3,24 +3,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    <EditText 
-        android:id="@+id/search_poi"
+    <RelativeLayout 
+        android:id="@+id/search_layout"
         android:layout_width="fill_parent"
-        android:layout_marginLeft="30dp"
-      	android:layout_marginRight="60dp"
-      	android:background="@android:drawable/edit_text"
-        android:layout_height="wrap_content"/>
-    <AutoCompleteTextView 
-        android:id="@+id/poi_search_txt"
-        android:layout_width="fill_parent"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="60dp"
-        android:background="@android:drawable/edit_text"
-        android:layout_height="wrap_content"/>
-	<Button
-	    android:id="@+id/poi_search_btn"
-	    android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+    	<AutoCompleteTextView 
+	        android:id="@+id/poi_search_txt"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:drawableLeft="@drawable/search"
+	        android:background="@android:drawable/edit_text"
+	        android:layout_marginLeft="30dp"
+	        android:layout_marginRight="70dp"
+	       />
+		<Button
+		    android:id="@+id/poi_search_btn"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_marginRight="5dp"
+		    android:text="搜索"/>
+    </RelativeLayout>
+   
+	<GridView 
+	    android:id="@+id/poi_theme_search"
+	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:layout_alignParentRight="true"
-	    android:text="搜索"/>
+	    android:layout_marginLeft="30dp"
+	    android:layout_below="@id/search_layout"
+	    android:horizontalSpacing="1pt"
+	    android:verticalSpacing="1pt"
+	    android:numColumns="4"
+	    android:gravity="center"></GridView>
 </RelativeLayout>
