@@ -60,7 +60,7 @@ public class SearchActivity extends Activity {
 		
 		gridView=(GridView) findViewById(R.id.poi_theme_search);
 		
-		fillGridByThemeLabel();
+//		fillGridByThemeLabel();
 		
 	}
 	/**
