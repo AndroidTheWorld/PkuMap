@@ -106,10 +106,17 @@ public class MapOnClickListener implements OnClickListener {
 			confirmStartEndLocation(MapActivity.RESULT_NAVI);
 			break;
 		case R.id.tool:
-			TestAudio();
+//			TestAudio();
 //			TestTimer();
+			useTool();
 			break;
 		}
+	}
+	/**
+	 * 工具（暂时没有）
+	 */
+	public void useTool(){
+		Toast.makeText(event_Activity, "工具", Toast.LENGTH_SHORT).show();
 	}
 	/**
 	 * 测试语音功能
@@ -160,7 +167,7 @@ public class MapOnClickListener implements OnClickListener {
 		if(MapActivity.gpsLonLat!=null){
 			if(curLocIsInPku(MapActivity.gpsLonLat)){
 //				Toast.makeText(event_Activity,"当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY(), Toast.LENGTH_SHORT).show();
-				poi_edit_txt.setText("当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY());
+//				poi_edit_txt.setText("当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY());
 				RoadNode near_node=event_Activity.roadPlan.getNearRoadNodeFromCurGps(MapActivity.gpsLonLat);
 				if(null==near_node){
 					Toast.makeText(event_Activity, "当前位置无法获取路口点信息，请到距路近的地方重试",Toast.LENGTH_SHORT ).show();
@@ -175,7 +182,7 @@ public class MapOnClickListener implements OnClickListener {
 				mapView.invalidate();
 			}else{
 				Toast.makeText(event_Activity, "当前位置不在北大",Toast.LENGTH_SHORT ).show();
-				poi_edit_txt.setText("当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY());
+//				poi_edit_txt.setText("当前GPS坐标："+MapActivity.gpsLonLat.getX()+","+MapActivity.gpsLonLat.getY());
 			}
 		}else{
 			Toast.makeText(event_Activity, "当前GPS不可用", Toast.LENGTH_SHORT).show();
