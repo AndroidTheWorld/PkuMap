@@ -82,7 +82,8 @@ public class MapActivity extends FragmentActivity {
 	 */
 //	public static PointLonLat gpsLonLat=new PointLonLat(116.306340,39.989003);
 //	public static PointLonLat gpsLonLat=new PointLonLat(116.305243,39.988932);
-	public static PointLonLat gpsLonLat=new PointLonLat( 116.305538,39.992547);
+//	public static PointLonLat gpsLonLat=new PointLonLat( 116.305538,39.992547);
+	public static PointLonLat gpsLonLat;
 	
 	private MapOnClickListener mapOnClickListener;
 	private GpsLocationListener gpsLocationListener;
