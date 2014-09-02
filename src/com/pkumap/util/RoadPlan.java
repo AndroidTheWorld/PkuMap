@@ -5,6 +5,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.pkumap.activity.MapActivity;
 import com.pkumap.activity.MapView;
@@ -96,7 +97,14 @@ public class RoadPlan {
 			endId=buildingManager.getPointIdByName(end);
 		}else{
 			if("我的位置".equals(start)){
-				startId=pathPlanManager.getPointIdFromCurGps(MapActivity.gpsLonLat, map_type);
+				if(MapActivity.gpsLonLat!=null){
+					startId=pathPlanManager.getPointIdFromCurGps(MapActivity.gpsLonLat, map_type);
+				}else{
+//					Toast.makeText(mapView.getContext(), "Gps不可用，请选择当前位置对用的POI", Toast.LENGTH_SHORT).show();
+					roadNodes=null;
+					return roadNodes;
+				}
+				
 			}else{
 				startId=poiManager.getPointIdByName(start);
 			}
