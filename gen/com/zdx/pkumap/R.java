@@ -17,25 +17,28 @@ public final class R {
     }
     public static final class drawable {
         public static final int bg_border=0x7f020000;
-        public static final int cur_loc=0x7f020001;
-        public static final int ic_launcher=0x7f020002;
-        public static final int layers=0x7f020003;
-        public static final int marker=0x7f020004;
-        public static final int navi=0x7f020005;
-        public static final int pop_border=0x7f020006;
-        public static final int shape=0x7f020007;
-        public static final int tab_address_normal=0x7f020008;
-        public static final int tab_address_pressed=0x7f020009;
-        public static final int tab_find_frd_pressed=0x7f02000a;
-        public static final int tab_settings_normal=0x7f02000b;
-        public static final int tab_settings_pressed=0x7f02000c;
-        public static final int tab_weixin_normal=0x7f02000d;
-        public static final int tab_weixin_pressed=0x7f02000e;
-        public static final int terrain=0x7f02000f;
-        public static final int three=0x7f020010;
-        public static final int two=0x7f020011;
-        public static final int zoom_in=0x7f020012;
-        public static final int zoom_out=0x7f020013;
+        public static final int collection=0x7f020001;
+        public static final int cur_loc=0x7f020002;
+        public static final int gohere=0x7f020003;
+        public static final int ic_launcher=0x7f020004;
+        public static final int layers=0x7f020005;
+        public static final int logo=0x7f020006;
+        public static final int marker=0x7f020007;
+        public static final int navi=0x7f020008;
+        public static final int navigation=0x7f020009;
+        public static final int near=0x7f02000a;
+        public static final int near_poi=0x7f02000b;
+        public static final int path=0x7f02000c;
+        public static final int poi_pic=0x7f02000d;
+        public static final int pop_border=0x7f02000e;
+        public static final int search=0x7f02000f;
+        public static final int shape=0x7f020010;
+        public static final int terrain=0x7f020011;
+        public static final int three=0x7f020012;
+        public static final int tool=0x7f020013;
+        public static final int two=0x7f020014;
+        public static final int zoom_in=0x7f020015;
+        public static final int zoom_out=0x7f020016;
     }
     public static final class id {
         public static final int bottomList=0x7f07000b;
@@ -70,6 +73,7 @@ public final class R {
         public static final int poi_detail_name=0x7f070023;
         public static final int poi_edit_search=0x7f070005;
         public static final int poi_go=0x7f070028;
+        public static final int poi_grid_label=0x7f07002d;
         public static final int poi_naviItem1=0x7f070027;
         public static final int poi_naviItem2=0x7f070029;
         public static final int poi_naviItem3=0x7f07002b;
@@ -77,8 +81,8 @@ public final class R {
         public static final int poi_option=0x7f070026;
         public static final int poi_search_btn=0x7f07002f;
         public static final int poi_search_txt=0x7f07002e;
+        public static final int poi_theme_search=0x7f070030;
         public static final int search_layout=0x7f070004;
-        public static final int search_poi=0x7f07002d;
         public static final int start_end=0x7f07001e;
         public static final int three_layer=0x7f070000;
         public static final int tool=0x7f070013;
@@ -93,7 +97,8 @@ public final class R {
         public static final int path_main=0x7f030002;
         public static final int pathplan_main=0x7f030003;
         public static final int poi_detail_fragment=0x7f030004;
-        public static final int search_main=0x7f030005;
+        public static final int poi_theme_search=0x7f030005;
+        public static final int search_main=0x7f030006;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
