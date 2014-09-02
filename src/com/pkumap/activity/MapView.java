@@ -631,8 +631,9 @@ public class MapView extends View {
             break;
 		 case MotionEvent.ACTION_MOVE:
 	       	 Log.i(TAG,"ACTION_MOVE");
-	       	 preMoveTime=System.currentTimeMillis();
+	       	//单指滑动
 	       	 if(event.getPointerCount()==1){
+	       		 preMoveTime=System.currentTimeMillis();
 	       		 curX=event.getX();
 	        	 curY=event.getY();
 	        	 preMoveX=preX;
@@ -683,6 +684,9 @@ public class MapView extends View {
     		Log.i("dTime", "dTime:"+(uptime-preMoveTime));
     		float speedX=0f;
     		float speedY=0f;
+    		if(preMoveTime==0){
+    			break;
+    		}
     		if((uptime-preMoveTime)!=0f){
     			speedX=(curX-preMoveX)/(uptime-preMoveTime);
            	 	speedY=(curY-preMoveY)/(uptime-preMoveTime);
@@ -699,6 +703,7 @@ public class MapView extends View {
         case MotionEvent.ACTION_POINTER_UP:
        	 Log.i(TAG,"ACTION_POINTER_UP");
        	 	//lastFingerDis=-1;
+       	 	preMoveTime=0;  
             break;
        
         }
