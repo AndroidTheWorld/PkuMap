@@ -13,6 +13,8 @@ import com.pkumap.eventlistener.MapOnClickListener;
 import com.pkumap.manager.AudioManager;
 import com.pkumap.manager.TimerManager;
 import com.pkumap.util.ConvertCoordinate;
+import com.pkumap.util.DisplayMetricsUtil;
+import com.pkumap.util.ImageLoader;
 import com.pkumap.util.RoadPlan;
 import com.zdx.pkumap.R;
 
@@ -33,12 +35,15 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -173,7 +178,8 @@ public class MapActivity extends FragmentActivity {
 	 */
 	private void initPoPupWindow(){
 		View layerView=LayoutInflater.from(this).inflate(R.layout.layer_main,null);
-        layers_window=new PopupWindow(layerView, 135,80);
+		int[] pop_wh = getPopWindowWidth();
+		layers_window=new PopupWindow(layerView, pop_wh[0], pop_wh[1]);
 //		layers_window.setFocusable(true);
 		//点击PopUpWindow区域外的部分，PopUpWindow消失
 //		layers_window.setOutsideTouchable(false);
@@ -184,7 +190,30 @@ public class MapActivity extends FragmentActivity {
         radio_layer_three=(RadioButton)layerView.findViewById(R.id.three_layer);
 	    radio_layer_two=(RadioButton) layerView.findViewById(R.id.two_layer);
 	}
-	
+	/**
+	 * 获得二三维弹出框的大小
+	 * @return
+	 */
+	private int[] getPopWindowWidth() {
+		int pop_width = 0, pop_height = 0;
+		int[] pop_wh = new int[2];
+		Resources resources = this.getResources();
+		Options three_options = ImageLoader.getOptionsOfOriginImg(resources, R.drawable.three);
+		pop_width += three_options.outWidth;
+		pop_height = three_options.outHeight;
+		Options two_options = ImageLoader.getOptionsOfOriginImg(resources, R.drawable.two);
+		pop_width += two_options.outWidth;
+		pop_height = two_options.outHeight > pop_height ?two_options.outHeight : pop_height;
+		Log.d("pop_wh", "pop_width1:" + pop_width);
+		Log.d("pop_wh", "pop_height1:" + pop_height);
+		pop_width = DisplayMetricsUtil.getInstance(this).dip2px(pop_width + 16);
+		pop_height = DisplayMetricsUtil.getInstance(this).dip2px(pop_height + 13);
+		Log.d("pop_wh", "pop_width2:" + pop_width);
+		Log.d("pop_wh", "pop_height2:" + pop_height);
+		pop_wh[0] = pop_width;
+		pop_wh[1] = pop_height;
+		return pop_wh;
+	}
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
