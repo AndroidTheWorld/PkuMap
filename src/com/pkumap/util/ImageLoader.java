@@ -1,7 +1,10 @@
 package com.pkumap.util;
 
+import android.R.integer;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -98,5 +101,15 @@ public class ImageLoader {
 		options.inJustDecodeBounds = false;
 		return BitmapFactory.decodeFile(pathName, options);
 	}
-
+	/**
+	 * 获取原始图片的宽和高
+	 * @param drawableId
+	 * @return 包含宽和高的类
+	 */
+	public static Options getOptionsOfOriginImg(Resources resources, int drawableId) {
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+		opts.inJustDecodeBounds = true;
+		BitmapFactory.decodeResource(resources, drawableId, opts);
+		return opts;
+	}
 }
